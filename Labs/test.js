@@ -20,7 +20,7 @@ fs.readdir(path.join(__dirname, "pages"), "utf-8", (err, data) => {
     console.log("file names", item);
     fs.readFile(path.join(__dirname, "pages", item), "utf-8", (err, data) => {
       if (err) throw err;
-      console.log(`file content ${data}`);
+      console.log("file content" + "\n" + data);
     });
   });
 });
