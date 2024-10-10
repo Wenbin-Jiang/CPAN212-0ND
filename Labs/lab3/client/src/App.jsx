@@ -1,4 +1,5 @@
 import { useState } from "react";
+import "./App.css";
 
 function App() {
   const [singleFile, setSingleFile] = useState(null);
@@ -116,75 +117,89 @@ function App() {
   };
 
   return (
-    <div style={{ padding: "20px" }}>
-      <h1>File Upload and Fetch App</h1>
+    <div className="app-container">
+      <div className="content-wrapper">
+        <h1>File Upload and Fetch App</h1>
 
-      {/* Section for uploading single file */}
-      <div>
-        <h2>Upload Single File</h2>
-        <input type="file" onChange={handleSingleFileChange} />
-        <button onClick={uploadSingleFile}>Upload Single File</button>
-      </div>
+        <div className="section">
+          <h2>Upload Single File</h2>
+          <input
+            type="file"
+            onChange={handleSingleFileChange}
+            className="input"
+          />
+          <button onClick={uploadSingleFile} className="button">
+            Upload Single File
+          </button>
+        </div>
 
-      {/* Section for uploading multiple files */}
-      <div>
-        <h2>Upload Multiple Files</h2>
-        <input type="file" multiple onChange={handleMultipleFilesChange} />
-        <button onClick={uploadMultipleFiles}>Upload Multiple Files</button>
-      </div>
+        <div className="section">
+          <h2>Upload Multiple Files</h2>
+          <input
+            type="file"
+            multiple
+            onChange={handleMultipleFilesChange}
+            className="input"
+          />
+          <button onClick={uploadMultipleFiles} className="button">
+            Upload Multiple Files
+          </button>
+        </div>
 
-      {/* Section for fetching and displaying a single file */}
-      <div>
-        <h2>Fetch Single File</h2>
-        <button onClick={fetchSingleFile}>Fetch Single File</button>
-        {fetchedSingleFile && (
-          <div>
-            <h3>Single File</h3>
-            <img
-              src={fetchedSingleFile}
-              alt="Fetched Single"
-              style={{ width: "200px", marginTop: "10px" }}
-            />
-          </div>
-        )}
-      </div>
-
-      {/* Section for fetching and displaying multiple files */}
-      <div>
-        <h2>Fetch Multiple Files</h2>
-        <button onClick={fetchMultipleImages}>Fetch Multiple Files</button>
-        {fetchedMultipleFiles.length > 0 && (
-          <div>
-            <h3>Multiple Files</h3>
-            {fetchedMultipleFiles.map((url, index) => (
+        <div className="section">
+          <h2>Fetch Single File</h2>
+          <button onClick={fetchSingleFile} className="button">
+            Fetch Single File
+          </button>
+          {fetchedSingleFile && (
+            <div>
+              <h3>Single File</h3>
               <img
-                key={index}
-                src={url}
-                alt={`Fetched Image ${index}`}
-                style={{ width: "200px", marginTop: "10px" }}
+                src={fetchedSingleFile}
+                alt="Fetched Single"
+                className="image"
               />
-            ))}
-          </div>
-        )}
-      </div>
+            </div>
+          )}
+        </div>
 
-      {/* Section for fetching random dog image */}
-      <div>
-        <h2>Random Dog Image</h2>
-        <button onClick={fetchRandomDogImage}>Get Random Dog Image</button>
-        {randomDogImage && (
-          <div>
-            <h3>Random Dog</h3>
-            <img
-              src={randomDogImage}
-              alt="Random Dog"
-              style={{ width: "200px", marginTop: "10px" }}
-            />
-            <button onClick={uploadRandomDogImage}>
-              Upload Random Dog Image
-            </button>
-          </div>
-        )}
+        <div className="section">
+          <h2>Fetch Multiple Files</h2>
+          <button onClick={fetchMultipleImages} className="button">
+            Fetch Multiple Files
+          </button>
+          {fetchedMultipleFiles.length > 0 && (
+            <div>
+              <h3>Multiple Files</h3>
+              {fetchedMultipleFiles.map((url, index) => (
+                <img
+                  key={index}
+                  src={url}
+                  alt={`Fetched Image ${index}`}
+                  className="image"
+                />
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="section">
+          <h2>Random Dog Image</h2>
+          <button onClick={fetchRandomDogImage} className="button">
+            Get Random Dog Image
+          </button>
+          {randomDogImage && (
+            <>
+              <div className="dog-image-container">
+                <h3>Random Dog</h3>
+                <img src={randomDogImage} alt="Random Dog" className="image" />
+              </div>
+              <button onClick={uploadRandomDogImage} className="button">
+                Upload Random Dog Image
+              </button>
+            </>
+          )}
+        </div>
       </div>
     </div>
   );
