@@ -70,14 +70,14 @@ const portfolioData = [
       {
         title: "Today I Learned",
         description: "A platform for sharing daily learnings.",
-        image: "/public/project-1.png", // Project 1 image URL
+        image: "/public/project-1.png",
         github: "https://github.com/Wenbin-Jiang/today-i-learned",
         liveDemo: "https://todayilearned-waynej.netlify.app",
       },
       {
         title: "Travel List",
         description: "An app to manage travel packing lists.",
-        image: "/public/project-2.png", // Project 2 image URL
+        image: "/public/project-2.png",
         github: "https://github.com/Wenbin-Jiang/travel-list",
         liveDemo: "https://wenbin-jiang.github.io/travel-list/",
       },
@@ -85,16 +85,16 @@ const portfolioData = [
         title: "usePopcorn",
         description:
           "A platform that helps users find and rate their favorite movies and series.",
-        image: "/public/project-3.png", // Project 3 image URL
+        image: "/public/project-3.png",
         github: "https://github.com/Wenbin-Jiang/usepopcorn",
-        liveDemo: "https://example.com/project-three",
+        liveDemo: "https://wenbin-jiang.github.io/usepopcorn/",
       },
     ],
   },
   {
     section: "resume",
     data: {
-      resumeLink: "/public/resume-example.pdf", // Resume file URL
+      resumeLink: "/public/wenbin-resume.pdf",
     },
   },
 ];
