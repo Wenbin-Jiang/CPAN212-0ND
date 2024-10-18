@@ -36,7 +36,7 @@ const Skills = () => {
               {skillsData.frontend.map((skill, index) => (
                 <article key={index}>
                   <img
-                    src="/src/assets/checkmark.png" // Assuming the icon is in public/assets
+                    src="/src/assets/checkmark.png"
                     alt="Experience icon"
                     className="icon"
                   />
@@ -55,7 +55,7 @@ const Skills = () => {
               {skillsData.backend.map((skill, index) => (
                 <article key={index}>
                   <img
-                    src="/src/assets/checkmark.png" // Assuming the icon is in public/assets
+                    src="/src/assets/checkmark.png"
                     alt="Experience icon"
                     className="icon"
                   />

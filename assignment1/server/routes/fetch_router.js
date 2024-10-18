@@ -49,5 +49,4 @@ router.get("/getResume", (req, res) => {
   res.json(resume.data);
 });
 
-// Export router
 export default router;
