@@ -3,8 +3,6 @@ const PORT = process.env.PORT || 8000;
 const express = require("express");
 const app = express();
 const cors = require("cors");
-const path = require("path");
-const fs = require("fs");
 const recipesRouter = require("./recipes_router");
 
 // adding mongoDB database
