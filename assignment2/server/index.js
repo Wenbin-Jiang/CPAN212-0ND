@@ -4,9 +4,8 @@ const express = require("express");
 const app = express();
 const cors = require("cors");
 const recipesRouter = require("./recipes_router");
-
-// adding mongoDB database
 const mongoose = require("mongoose");
+
 mongoose.connect(process.env.MONGODB_KEY);
 const db = mongoose.connection;
 
