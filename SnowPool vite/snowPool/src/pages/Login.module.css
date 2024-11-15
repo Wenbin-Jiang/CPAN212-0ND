@@ -1,0 +1,65 @@
+.login {
+  margin: 2.5rem;
+  padding: 2.5rem 5rem;
+  min-height: calc(100vh - 5rem);
+  background-image: linear-gradient(
+      rgba(166, 168, 172, 0.293),
+      rgba(106, 108, 110, 0.798)
+    ),
+    url("../loginbg.jpeg");
+  background-size: cover;
+  background-position: center;
+}
+
+.form {
+  background-color: rgba(221, 219, 219, 0.431);
+  border-radius: 7px;
+  padding: 2rem 3rem;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  opacity: 0.9;
+  color: black;
+
+  /* Different from other form */
+  width: 48rem;
+  margin: 8rem auto;
+}
+
+.row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+button {
+  background-color: #00c46a;
+  text-transform: uppercase;
+  padding: 0.8rem 1.6rem;
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 1.5rem;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.buttons {
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Center child elements horizontally */
+}
+
+.buttons h5,
+.buttons h3 {
+  color: #161717;
+  cursor: pointer;
+  text-align: center;
+  margin-top: 1rem;
+}
+
+.buttons h5:hover,
+.buttons h3:hover {
+  text-decoration: underline;
+}

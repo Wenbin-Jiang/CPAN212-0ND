@@ -1,0 +1,56 @@
+/* SearchBox.module.css */
+
+.searchbox {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 2em;
+  margin: 2em 0;
+  padding: 4em;
+  border-radius: 8px;
+  background-color: #f5f5f5;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  max-width: 75%;
+  margin-left: auto;
+  margin-right: auto;
+  opacity: 0.8;
+}
+
+h2 {
+  margin-bottom: 3em;
+  font-size: 2em;
+  color: #333;
+  text-align: center;
+}
+
+.searchbox input[type="text"],
+.searchbox input[type="date"],
+.searchbox button {
+  width: 70%;
+  padding: 1em;
+  font-size: 1.3em;
+  font-weight: 700;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  box-sizing: border-box;
+}
+
+.searchbox input[type="text"]:focus,
+.searchbox input[type="date"]:focus {
+  border-color: #333;
+  outline: none;
+}
+
+.searchbox button {
+  width: 35%;
+  background-color: #00c46a;
+  color: black;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.searchbox button:hover {
+  background-color: #1c7ed6;
+}
