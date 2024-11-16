@@ -5,13 +5,14 @@ import styles from "./FindRide.module.css";
 
 function FindRide() {
   return (
-    <main className={styles.findride}>
-      <PageNav />
+    <>
+      <main className={styles.findride}>
+        <PageNav />
 
-      <SearchBox />
-
+        <SearchBox />
+      </main>
       <Footer />
-    </main>
+    </>
   );
 }
 
