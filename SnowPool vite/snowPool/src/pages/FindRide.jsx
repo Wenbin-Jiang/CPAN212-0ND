@@ -8,8 +8,9 @@ function FindRide() {
     <>
       <main className={styles.findride}>
         <PageNav />
-
-        <SearchBox />
+        <div className={styles.row}>
+          <SearchBox />
+        </div>
       </main>
       <Footer />
     </>

@@ -12,6 +12,13 @@
   background-position: center;
 }
 
+.row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 50px;
+}
+
 h2 {
   font-size: 3rem;
   font-weight: 1000;
