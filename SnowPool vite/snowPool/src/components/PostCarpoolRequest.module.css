@@ -1,0 +1,53 @@
+.formContainer {
+  width: 30%;
+  height: auto;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 10px;
+}
+
+.formContainer h1 {
+  margin-bottom: 30px;
+  font-weight: 900;
+}
+
+.formContainer div {
+  margin-bottom: 15px;
+  width: 100%;
+}
+
+.formContainer label {
+  display: flex;
+  font-weight: bold;
+}
+
+.formContainer input {
+  width: 60%;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+}
+
+.formContainer textarea {
+  width: 100%;
+  resize: vertical;
+  min-height: 100px;
+}
+
+.formContainer button {
+  padding: 10px 20px;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  width: auto;
+}
+
+.formContainer button:hover {
+  background-color: #45a049;
+}
