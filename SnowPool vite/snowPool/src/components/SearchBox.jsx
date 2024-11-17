@@ -16,13 +16,13 @@ function SearchBox() {
       <div className={styles.searchbox}>
         <input
           type="text"
-          placeholder="From"
+          placeholder="Origin"
           value={from}
           onChange={(e) => setFrom(e.target.value)}
         />
         <input
           type="text"
-          placeholder="To"
+          placeholder="Destination"
           value={to}
           onChange={(e) => setTo(e.target.value)}
         />
