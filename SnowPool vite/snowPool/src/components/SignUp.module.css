@@ -33,9 +33,12 @@ button {
   width: 110px;
 }
 
-.back {
-  background-color: rgba(0, 0, 0, 0.715);
+.backButton {
+  background-color: rgba(0, 0, 0, 0.429);
   color: white;
+}
+.backButton:hover {
+  background-color: rgba(0, 0, 0, 0.715);
 }
 
 .buttons {

@@ -26,7 +26,7 @@ export default function ForgotPassword({ onBack }) {
       </div>
       <div className={styles.buttons}>
         <button type="submit">Reset</button>
-        <button type="button" onClick={onBack} className={styles.cancel}>
+        <button type="button" onClick={onBack} className={styles.cancelButton}>
           Cancel
         </button>
       </div>

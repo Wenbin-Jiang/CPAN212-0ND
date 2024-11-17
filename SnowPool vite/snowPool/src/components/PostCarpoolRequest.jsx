@@ -23,8 +23,9 @@ export default function PostCarpoolRequest() {
   return (
     <form onSubmit={handleSubmit} className={styles.formContainer}>
       <h1>Request a Carpool</h1>
-      <div>
-        <label>Pickup Location:</label>
+      <h2>Get notified when new trips match your travel needs</h2>
+      <div className={styles.requestInput}>
+        <label>Origin:</label>
         <input
           type="text"
           value={pickupLocation}
@@ -32,8 +33,8 @@ export default function PostCarpoolRequest() {
           placeholder="Enter your pickup location"
         />
       </div>
-      <div>
-        <label>Dropoff Location:</label>
+      <div className={styles.requestInput}>
+        <label>Destination:</label>
         <input
           type="text"
           value={dropoffLocation}
@@ -41,7 +42,7 @@ export default function PostCarpoolRequest() {
           placeholder="Enter your dropoff location"
         />
       </div>
-      <div>
+      <div className={styles.requestInput}>
         <label>Date:</label>
         <input
           type="date"
@@ -49,7 +50,7 @@ export default function PostCarpoolRequest() {
           onChange={(e) => setDate(e.target.value)}
         />
       </div>
-      <div>
+      <div className={styles.requestInput}>
         <label>Pickup Time:</label>
         <input
           type="time"
@@ -57,7 +58,7 @@ export default function PostCarpoolRequest() {
           onChange={(e) => setTime(e.target.value)}
         />
       </div>
-      <div>
+      <div className={styles.requestInput}>
         <label>Additional Message:</label>
         <textarea
           value={message}
@@ -65,7 +66,9 @@ export default function PostCarpoolRequest() {
           placeholder="Add any additional details or special instructions"
         ></textarea>
       </div>
-      <button type="submit">Request Carpool</button>
+      <button type="submit" className={styles.requestInput}>
+        Request Carpool
+      </button>
     </form>
   );
 }

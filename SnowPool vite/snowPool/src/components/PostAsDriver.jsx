@@ -1,17 +1,17 @@
 import React, { useState } from "react";
+import styles from "./PostAsDriver.module.css";
 
 export default function PostAsDriver() {
   const [departure, setDeparture] = useState("");
   const [destination, setDestination] = useState("");
   const [date, setDate] = useState("");
-  const [time, setTime] = useState(""); // New Pickup Time
+  const [time, setTime] = useState("");
   const [seatsAvailable, setSeatsAvailable] = useState(1);
-  const [cost, setCost] = useState(""); // New Cost
-  const [message, setMessage] = useState(""); // New Message Box
+  const [cost, setCost] = useState("");
+  const [message, setMessage] = useState("");
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Process the form data
     console.log({
       departure,
       destination,
@@ -24,10 +24,14 @@ export default function PostAsDriver() {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <h2>Post a Ride as Driver</h2>
-      <div>
-        <label>Departure:</label>
+    <form onSubmit={handleSubmit} className={styles.formContainer}>
+      <h1>Post a Ride as Driver</h1>
+      <h2>
+        Cover your driving costs by filling your seats when you’re driving to
+        the slope.
+      </h2>
+      <div className={styles.requestInput}>
+        <label>Origin:</label>
         <input
           type="text"
           value={departure}
@@ -35,7 +39,7 @@ export default function PostAsDriver() {
           placeholder="Enter your departure location"
         />
       </div>
-      <div>
+      <div className={styles.requestInput}>
         <label>Destination:</label>
         <input
           type="text"
@@ -44,23 +48,21 @@ export default function PostAsDriver() {
           placeholder="Enter your destination"
         />
       </div>
-      <div>
-        <label>Date:</label>
+      <div className={styles.requestInput}>
+        <label>Leaving:</label>
         <input
           type="date"
           value={date}
           onChange={(e) => setDate(e.target.value)}
         />
-      </div>
-      <div>
-        <label>Pickup Time:</label>
+        <p>at</p>
         <input
           type="time"
           value={time}
           onChange={(e) => setTime(e.target.value)}
         />
       </div>
-      <div>
+      <div className={styles.requestInput}>
         <label>Seats Available:</label>
         <input
           type="number"
@@ -69,8 +71,8 @@ export default function PostAsDriver() {
           min="1"
         />
       </div>
-      <div>
-        <label>Cost per Person:</label>
+      <div className={styles.requestInput}>
+        <label>Price per seat:</label>
         <input
           type="number"
           value={cost}
@@ -80,7 +82,7 @@ export default function PostAsDriver() {
           step="0.01"
         />
       </div>
-      <div>
+      <div className={styles.requestInput}>
         <label>Additional Message:</label>
         <textarea
           value={message}

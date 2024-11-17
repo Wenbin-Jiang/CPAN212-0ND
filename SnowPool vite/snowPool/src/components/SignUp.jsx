@@ -37,7 +37,7 @@ export default function SignUp({ onBack }) {
       </div>
       <div className={styles.buttons}>
         <button type="submit">Sign Up</button>
-        <button type="button" onClick={onBack} className={styles.back}>
+        <button type="button" onClick={onBack} className={styles.backButton}>
           Back
         </button>
       </div>

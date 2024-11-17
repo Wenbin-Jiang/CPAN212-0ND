@@ -9,6 +9,7 @@
     url("../postridebg.jpeg");
   background-size: cover;
   background-position: center;
+  flex: 1;
 }
 
 .row {
@@ -58,26 +59,27 @@
 }
 
 .backButton {
-  margin-top: 2rem;
-  background-color: rgba(221, 219, 219, 0.431);
-  padding: 1rem 2rem;
-  border-radius: 5px;
+  margin: 2rem 33rem;
+  background-color: rgba(0, 0, 0, 0.429);
+  padding: 0.6rem 1.5rem;
+  border-radius: 7px;
   text-align: center;
   cursor: pointer;
   width: fit-content;
   transition: background-color 0.2s;
+  font-size: 15px;
 }
 
 .backButton:hover {
-  background-color: #ccc;
+  background-color: rgba(0, 0, 0, 0.715);
 }
 
 footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
   width: 100%;
   background-color: white;
   color: black;
   text-align: center;
-  padding: 1em;
-  position: absolute;
-  bottom: 0;
 }
