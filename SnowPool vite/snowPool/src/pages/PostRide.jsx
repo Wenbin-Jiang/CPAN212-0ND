@@ -20,14 +20,18 @@ function PostRide() {
                 className={`${styles.option} ${styles.driverpost}`}
                 onClick={() => setSelectedOption("driver")}
               >
-                <h2>I'm driving</h2>
+                <h2>
+                  I'm driving <i className="fas fa-car"></i>
+                </h2>
                 <p>I want to fill empty seats in my car</p>
               </div>
               <div
                 className={`${styles.option} ${styles.carpoolpost}`}
                 onClick={() => setSelectedOption("request")}
               >
-                <h2>Post a request</h2>
+                <h2>
+                  Post a request <i className="fas fa-bell"></i>{" "}
+                </h2>
                 <p>Notify me when a ride is available</p>
               </div>
             </div>

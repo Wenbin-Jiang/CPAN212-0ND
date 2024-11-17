@@ -11,8 +11,15 @@
   gap: 4rem;
 }
 
+.nav i {
+  font-size: 1.5rem;
+  margin-right: 0.8rem;
+  text-align: center;
+}
+
 .nav a:link,
-.nav a:visited {
+.nav a:visited,
+.nav i:visited {
   text-decoration: none;
   color: var(--color-light--2);
   text-transform: uppercase;

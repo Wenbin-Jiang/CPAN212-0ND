@@ -3,7 +3,13 @@ import Homepage from "./pages/Homepage";
 import FindRide from "./pages/FindRide";
 import PostRide from "./pages/PostRide";
 import Login from "./pages/Login";
+import Dashboard from "./pages/Dashboard";
 import Checkout from "./pages/Checkout";
+
+const user = {
+  name: "Wen Bin",
+  profileImage: "../profile-pic.png",
+};
 
 function App() {
   return (
@@ -14,6 +20,7 @@ function App() {
           <Route path="findride" element={<FindRide />} />
           <Route path="postride" element={<PostRide />} />
           <Route path="login" element={<Login />} />
+          <Route path="dashboard" element={<Dashboard user={user} />} />
           {/* <Route path="/forgot-password" element={<ForgotPassword />} /> */}
           {/* <Route path="/sign-up" element={<SignUp />} /> */}
           <Route path="checkout" element={<Checkout />} />

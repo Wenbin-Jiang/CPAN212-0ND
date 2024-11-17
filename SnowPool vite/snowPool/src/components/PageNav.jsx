@@ -8,14 +8,32 @@ function PageNav() {
       <Logo />
       <ul>
         <li>
-          <NavLink to="/findride">Find a Ride</NavLink>
+          <NavLink to="/dashboard">
+            {" "}
+            <i className="fas fa-columns"></i> Dashboard
+          </NavLink>
         </li>
         <li>
-          <NavLink to="/postride">Post a Ride</NavLink>
+          <NavLink to="/trips">
+            {" "}
+            <i className="fas fa-car"></i>Trips
+          </NavLink>
+        </li>
+        <li>
+          <NavLink to="/findride">
+            {" "}
+            <i className="fas fa-search"></i> Find a Ride
+          </NavLink>
+        </li>
+        <li>
+          <NavLink to="/postride">
+            {" "}
+            <i className="fas fa-plus"></i>Post a Ride
+          </NavLink>
         </li>
         <li>
           <NavLink to="/Login" className={styles.ctaLink}>
-            Log In
+            <i className="fas fa-user"></i> Log In
           </NavLink>
         </li>
       </ul>

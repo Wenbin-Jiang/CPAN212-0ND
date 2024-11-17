@@ -9,7 +9,6 @@
     url("../postridebg.jpeg");
   background-size: cover;
   background-position: center;
-  flex: 1;
 }
 
 .row {
@@ -22,6 +21,10 @@
 .postride h1 {
   font-weight: 700;
   font-size: 4rem;
+}
+
+.postride i {
+  margin-left: 1.5rem;
 }
 
 .buttons {
