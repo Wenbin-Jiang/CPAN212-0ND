@@ -1,5 +1,5 @@
-/* Main wrapper for FindRide page */
-.findride {
+.findride,
+.findride.withResults {
   margin: 2.5rem;
   padding: 2.5rem 5rem;
   min-height: calc(100vh - 5rem);
@@ -10,6 +10,7 @@
     url("../findride.jpg");
   background-size: cover;
   background-position: center;
+  transition: all 0.3s ease;
 }
 
 .row {
@@ -22,14 +23,20 @@
 h2 {
   font-size: 3rem;
   font-weight: 1000;
+  color: white;
 }
 
-footer {
-  width: 100%;
-  background-color: white;
-  color: black;
-  text-align: center;
-  padding: 1em;
-  position: absolute;
-  bottom: 0;
+.withResults h2 {
+  color: #333;
+}
+
+@media (max-width: 768px) {
+  .findride {
+    margin: 1rem;
+    padding: 1rem;
+  }
+
+  h2 {
+    font-size: 2rem;
+  }
 }
