@@ -1,12 +1,21 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useUserContext } from "../contexts/UserContext";
 import PageNav from "../components/PageNav";
 import Footer from "../components/Footer";
 import styles from "./Dashboard.module.css";
 
-const Dashboard = ({ user }) => {
+const Dashboard = () => {
   const [showPopup, setShowPopup] = useState(false);
   const navigate = useNavigate();
+  const { userData, loading } = useUserContext();
+
+  useEffect(() => {
+    // Redirect to login if no user data
+    if (!loading && !userData) {
+      navigate("/login");
+    }
+  }, [userData, loading, navigate]);
 
   const handleGetStarted = () => {
     setShowPopup(true);
@@ -17,6 +26,18 @@ const Dashboard = ({ user }) => {
     navigate(path);
   };
 
+  if (loading) {
+    return (
+      <div className={styles.loadingContainer}>
+        <div className={styles.loader}>Loading...</div>
+      </div>
+    );
+  }
+
+  if (!userData) {
+    return null;
+  }
+
   return (
     <div className={styles.dashboardContainer}>
       <PageNav />
@@ -24,12 +45,12 @@ const Dashboard = ({ user }) => {
       <div className={styles.profileSection}>
         <div className={styles.profileInfo}>
           <img
-            src={user.profileImage}
+            src={userData.profilePicture || "../profile-icon.jpeg"}
             alt="Profile"
             className={styles.profileImage}
           />
           <div className={styles.welcomeText}>
-            <h1>Hi {user.name},</h1>
+            <h1>Hi {userData.name},</h1>
             <p>Welcome to SnowPool!</p>
           </div>
         </div>
@@ -38,11 +59,15 @@ const Dashboard = ({ user }) => {
         <div className={styles.statsContainer}>
           <div className={styles.statItem}>
             <i className="fas fa-road"></i>
-            <span>No km shared, yet</span>
+            <span>{userData.totalKm || "No km shared, yet"}</span>
           </div>
           <div className={styles.statItem}>
             <i className="fas fa-car"></i>
-            <span>You've not driven, yet</span>
+            <span>
+              {userData.totalRides
+                ? `${userData.totalRides} rides`
+                : "You've not driven, yet"}
+            </span>
           </div>
         </div>
 

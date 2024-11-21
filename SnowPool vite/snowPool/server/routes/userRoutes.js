@@ -12,6 +12,6 @@ const router = express.Router();
 // User routes
 router.post("/register", registerUser); // Public
 router.post("/login", loginUser); // Public
-router.put("/profile", protectAndAuthorize, updateUserProfile); // Protected
+router.put("/profile/update", protectAndAuthorize, updateUserProfile); // Protected
 router.get("/profile", protectAndAuthorize, getUserProfile); // Protected
 module.exports = router;

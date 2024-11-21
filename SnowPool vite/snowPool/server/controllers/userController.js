@@ -152,13 +152,14 @@ const getUserProfile = async (req, res) => {
     res.status(200).json({
       success: true,
       data: {
+        createdAt: user.createdAt,
         id: user._id,
         email: user.email,
         name: user.name,
         address: user.address,
         gender: user.gender,
         birthday: user.birthday,
-        phone: user.birthday,
+        phone: user.phone,
         driverHistory: user.driverHistory,
         carModel: user.carModel,
         licensePlate: user.licensePlate,

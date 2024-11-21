@@ -6,15 +6,17 @@ import SignUp from "../components/SignUp";
 import axios from "axios";
 import styles from "./Login.module.css";
 import { useNavigate } from "react-router-dom";
+import { useUserContext } from "../contexts/UserContext";
+
 const baseURL = "http://localhost:8001";
 
 export default function Login() {
-  const [view, setView] = useState("login"); // "login", "forgotPassword", or "signUp"
+  const [view, setView] = useState("login");
   const [email, setEmail] = useState("user2@example.com");
   const [password, setPassword] = useState("password2");
-  const [error, setError] = useState(""); // State to store error messages
-
+  const [error, setError] = useState("");
   const navigate = useNavigate();
+  const { setUser } = useUserContext();
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -23,26 +25,21 @@ export default function Login() {
       const response = await axios.post(`${baseURL}/api/users/login`, {
         email,
         password,
-      }); // Send login data to backend
+      });
       const { token } = response.data;
-
-      // Store token in local storage or session storage
       localStorage.setItem("authToken", token);
 
-      // Fetch the user profile to check if it's complete
       const profileResponse = await axios.get(`${baseURL}/api/users/profile`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
 
-      const { profileComplete } = profileResponse.data.data; // Assuming profileComplete is returned in the response
+      setUser(profileResponse.data.data);
 
-      if (profileComplete) {
-        // Redirect to dashboard if profile is complete
+      if (profileResponse.data.data.profileComplete) {
         navigate("/dashboard");
       } else {
-        // Redirect to profile page to complete profile
         navigate("/userprofile");
       }
     } catch (err) {

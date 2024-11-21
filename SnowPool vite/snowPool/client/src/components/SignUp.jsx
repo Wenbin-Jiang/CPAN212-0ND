@@ -1,18 +1,58 @@
 import { useState } from "react";
 import styles from "./SignUp.module.css";
+import axios from "axios";
+
+const baseURL = "http://localhost:8001";
 
 export default function SignUp({ onBack }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSignUp = (e) => {
+  const handleSignUp = async (e) => {
     e.preventDefault();
-    alert(`Account created for ${email}`);
-    onBack(); // Navigate back to the login form
+    setError("");
+    setLoading(true);
+
+    try {
+      const response = await axios.post(
+        `${baseURL}/api/users/register`,
+        {
+          email,
+          password,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      // Check if registration was successful
+      if (response.data) {
+        // Clear form
+        setEmail("");
+        setPassword("");
+
+        // Show success message and redirect to login
+        alert("Registration successful! Please login.");
+        onBack(); // Navigate back to the login form
+      }
+    } catch (err) {
+      setError(
+        err.response?.data?.message || "Registration failed. Please try again."
+      );
+      console.error("Registration error:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <form className={styles.form} onSubmit={handleSignUp}>
+      {error && <div className={styles.error}>{error}</div>}
+
       <div className={styles.row}>
         <label htmlFor="signup-email">Email address</label>
         <input
@@ -24,6 +64,7 @@ export default function SignUp({ onBack }) {
           required
         />
       </div>
+
       <div className={styles.row}>
         <label htmlFor="signup-password">Password</label>
         <input
@@ -35,9 +76,17 @@ export default function SignUp({ onBack }) {
           required
         />
       </div>
+
       <div className={styles.buttons}>
-        <button type="submit">Sign Up</button>
-        <button type="button" onClick={onBack} className={styles.backButton}>
+        <button type="submit" disabled={loading}>
+          {loading ? "Signing Up..." : "Sign Up"}
+        </button>
+        <button
+          type="button"
+          onClick={onBack}
+          className={styles.backButton}
+          disabled={loading}
+        >
           Back
         </button>
       </div>

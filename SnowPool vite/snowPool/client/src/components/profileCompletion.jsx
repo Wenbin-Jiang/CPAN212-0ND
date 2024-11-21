@@ -1,13 +1,23 @@
 import { useState } from "react";
 import styles from "./ProfileCompletion.module.css";
+import { useUserContext } from "../contexts/UserContext";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+
+const baseURL = "http://localhost:8001";
 
 const ProfileCompletion = () => {
+  const { setUser } = useUserContext();
+  const navigate = useNavigate();
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
   const [formData, setFormData] = useState({
     name: "",
     address: "",
     gender: "",
     birthday: "",
-    phoneNumber: "",
+    phone: "",
     driverHistory: "",
     carModel: "",
     licensePlate: "",
@@ -15,11 +25,88 @@ const ProfileCompletion = () => {
     profilePicture: null,
   });
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+
+    try {
+      const token = localStorage.getItem("authToken");
+
+      // Create the profile data object with profileComplete flag
+      const profileData = {
+        ...formData,
+        profileComplete: true, // Explicitly set profileComplete to true
+      };
+      delete profileData.profilePicture; // Remove profilePicture from JSON data
+
+      // First, update profile data
+      const response = await axios.put(
+        `${baseURL}/api/users/profile/update`,
+        profileData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      // If there's a profile picture, handle it separately
+      if (formData.profilePicture) {
+        const pictureFormData = new FormData();
+        pictureFormData.append("profilePicture", formData.profilePicture);
+
+        await axios.put(
+          `${baseURL}/api/users/profile/update`,
+          pictureFormData,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+      }
+
+      // Update the user context with the response data and ensure profileComplete is true
+      setUser({
+        ...response.data.user,
+        profileComplete: true,
+      });
+
+      // Force a reload of the profile data
+      const updatedProfile = await axios.get(`${baseURL}/api/users/profile`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      setUser({
+        ...updatedProfile.data.data,
+        profileComplete: true,
+      });
+
+      // Navigate to the profile page
+      navigate("/userprofile", { replace: true });
+    } catch (err) {
+      setError(
+        err.response?.data?.message ||
+          "Error completing profile. Please try again."
+      );
+      console.error("Profile completion error:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className={styles.completionForm}>
       <h1>Complete Your Profile</h1>
 
-      <form className={styles.form}>
+      <form className={styles.form} onSubmit={handleSubmit}>
+        {error && <div className={styles.error}>{error}</div>}
+
         <div className={styles.photoSection}>
           <div className={styles.avatarContainer}>
             <div className={styles.avatarPreview}>
@@ -111,18 +198,19 @@ const ProfileCompletion = () => {
             type="tel"
             required
             placeholder="Enter your phone number"
-            value={formData.phoneNumber}
+            value={formData.phone}
             onChange={(e) =>
-              setFormData({ ...formData, phoneNumber: e.target.value })
+              setFormData({ ...formData, phone: e.target.value })
             }
           />
         </div>
 
         <div className={styles.formGroup}>
           <label>Driver History *</label>
-          <textarea
+          <input
+            type="text"
             required
-            placeholder="Enter your driving experience and history"
+            placeholder="Enter your driver license class and history"
             value={formData.driverHistory}
             onChange={(e) =>
               setFormData({ ...formData, driverHistory: e.target.value })
@@ -170,12 +258,18 @@ const ProfileCompletion = () => {
         <div className={styles.agreements}>
           <label className={styles.checkbox}>
             <input type="checkbox" required />
-            <span>I agree to the community guidelines</span>
           </label>
+          <span className={styles.agreementsText}>
+            I agree to the community guidelines
+          </span>
         </div>
 
-        <button type="submit" className={styles.submitButton}>
-          Complete Profile
+        <button
+          type="submit"
+          className={styles.submitButton}
+          disabled={loading}
+        >
+          {loading ? "Completing Profile..." : "Complete Profile"}
         </button>
       </form>
     </div>
