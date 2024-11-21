@@ -1,4 +1,5 @@
 const express = require("express");
+const path = require("path");
 const dotenv = require("dotenv");
 const cors = require("cors");
 const connectDB = require("./config/db");
@@ -11,6 +12,15 @@ connectDB();
 
 // Initialize app
 const app = express();
+
+// Create uploads directory if it doesn't exist
+const fs = require("fs");
+if (!fs.existsSync("uploads")) {
+  fs.mkdirSync("uploads");
+}
+
+// Serve static files from uploads directory
+app.use("/uploads", express.static("uploads"));
 
 // Middleware
 app.use(cors());

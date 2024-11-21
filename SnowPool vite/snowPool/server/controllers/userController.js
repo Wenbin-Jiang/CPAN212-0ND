@@ -172,9 +172,36 @@ const getUserProfile = async (req, res) => {
   }
 };
 
+// Add to userController.js
+const deleteUserAccount = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found.",
+      });
+    }
+
+    // Delete user from database
+    await User.findByIdAndDelete(req.user.id);
+
+    res.status(200).json({
+      success: true,
+      message: "Account deleted successfully",
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+};
+
 module.exports = {
   registerUser,
   loginUser,
   updateUserProfile,
   getUserProfile,
+  deleteUserAccount,
 };

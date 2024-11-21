@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import PageNav from "../components/PageNav";
 import Footer from "../components/Footer";
 import ProfileCompletion from "../components/profileCompletion";
@@ -10,8 +10,12 @@ import axios from "axios";
 const baseURL = "http://localhost:8001";
 
 const ProfilePage = () => {
-  const { profileComplete, userData, setUser, loading } = useUserContext();
+  const { profileComplete, userData, setUser, loading, logout } =
+    useUserContext();
   const navigate = useNavigate();
+  const [error, setError] = useState("");
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -113,6 +117,52 @@ const ProfilePage = () => {
     }
   };
 
+  //handle delete account
+  const handleDeleteAccount = async () => {
+    if (
+      !window.confirm(
+        "Are you sure you want to delete your account? This action cannot be undone."
+      )
+    ) {
+      return;
+    }
+
+    try {
+      setDeleteLoading(true);
+      const token = localStorage.getItem("authToken");
+      await axios.delete(`${baseURL}/api/users/profile/delete`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      logout(); // Clear user context and local storage
+      navigate("/"); // Redirect to home page
+    } catch (error) {
+      console.error("Error deleting account:", error);
+      setError(error.response?.data?.message || "Error deleting account");
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
+  const DeleteAccountSection = () => (
+    <div className={styles.deleteSection}>
+      <h2>Delete Account</h2>
+      <p className={styles.warningText}>
+        Warning: This action cannot be undone. All your data will be permanently
+        deleted.
+      </p>
+      <button
+        className={styles.deleteButton}
+        onClick={handleDeleteAccount}
+        disabled={deleteLoading}
+      >
+        {deleteLoading ? "Deleting Account..." : "Delete Account"}
+      </button>
+    </div>
+  );
+
   return (
     <div className={styles.userProfile}>
       <PageNav />
@@ -207,6 +257,7 @@ const ProfilePage = () => {
             </div>
           </div>
         </div>
+        <DeleteAccountSection />
       </div>
       <Footer />
     </div>

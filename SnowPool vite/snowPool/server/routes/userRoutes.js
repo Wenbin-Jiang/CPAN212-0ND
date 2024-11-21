@@ -4,14 +4,20 @@ const {
   loginUser,
   updateUserProfile,
   getUserProfile,
+  deleteUserAccount,
 } = require("../controllers/userController");
 const protectAndAuthorize = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
 // User routes
-router.post("/register", registerUser); // Public
-router.post("/login", loginUser); // Public
-router.put("/profile/update", protectAndAuthorize, updateUserProfile); // Protected
-router.get("/profile", protectAndAuthorize, getUserProfile); // Protected
+
+// Public
+router.post("/register", registerUser);
+router.post("/login", loginUser);
+// Protected
+router.put("/profile/update", protectAndAuthorize, updateUserProfile);
+router.get("/profile", protectAndAuthorize, getUserProfile);
+router.delete("/profile/delete", protectAndAuthorize, deleteUserAccount);
+
 module.exports = router;
