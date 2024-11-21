@@ -1,17 +1,26 @@
+// components/PostCarpoolRequest.jsx
 import React, { useState, useEffect } from "react";
 import styles from "./PostCarpoolRequest.module.css";
-import { useGoogleAutocomplete } from "../hooks/useGoogleAutocomplete";
+import { useGooglePlacesWithGeo } from "../hooks/useGooglePlacesWithGeo";
 
 export default function PostCarpoolRequest() {
-  const [pickupLocation, setPickupLocation] = useState("");
-  const [dropoffLocation, setDropoffLocation] = useState("");
+  const [pickupLocation, setPickupLocation] = useState({
+    address: "",
+    lat: null,
+    lng: null,
+  });
+  const [dropoffLocation, setDropoffLocation] = useState({
+    address: "",
+    lat: null,
+    lng: null,
+  });
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [seatRequired, setSeatRequired] = useState("");
   const [willingToPay, setWillingToPay] = useState("");
   const [message, setMessage] = useState("");
 
-  const { initializeAutocomplete } = useGoogleAutocomplete();
+  const { initializeAutocomplete } = useGooglePlacesWithGeo();
 
   useEffect(() => {
     initializeAutocomplete("request-pickup", setPickupLocation);
@@ -21,8 +30,14 @@ export default function PostCarpoolRequest() {
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log({
-      pickupLocation,
-      dropoffLocation,
+      pickup: {
+        address: pickupLocation.address,
+        coordinates: { lat: pickupLocation.lat, lng: pickupLocation.lng },
+      },
+      dropoff: {
+        address: dropoffLocation.address,
+        coordinates: { lat: dropoffLocation.lat, lng: dropoffLocation.lng },
+      },
       date,
       time,
       seatRequired,
@@ -35,27 +50,34 @@ export default function PostCarpoolRequest() {
     <form onSubmit={handleSubmit} className={styles.formContainer}>
       <h1>Request a Carpool</h1>
       <h2>Get notified when new trips match your travel needs</h2>
+
       <div className={styles.requestInput}>
         <label>Origin:</label>
         <input
           id="request-pickup"
           type="text"
-          value={pickupLocation}
-          onChange={(e) => setPickupLocation(e.target.value)}
+          value={pickupLocation.address}
+          onChange={(e) =>
+            setPickupLocation({ ...pickupLocation, address: e.target.value })
+          }
           placeholder="Enter your pickup location"
         />
       </div>
+
       <div className={styles.requestInput}>
         <label>Destination:</label>
         <input
           id="request-dropoff"
           type="text"
-          value={dropoffLocation}
-          onChange={(e) => setDropoffLocation(e.target.value)}
+          value={dropoffLocation.address}
+          onChange={(e) =>
+            setDropoffLocation({ ...dropoffLocation, address: e.target.value })
+          }
           placeholder="Enter your dropoff location"
         />
       </div>
 
+      {/* Rest of the form remains the same */}
       <div className={styles.requestInput}>
         <label>Date:</label>
         <input
@@ -70,6 +92,7 @@ export default function PostCarpoolRequest() {
           onChange={(e) => setTime(e.target.value)}
         />
       </div>
+
       <div className={styles.requestInput}>
         <label>Seat Required:</label>
         <input
@@ -80,6 +103,7 @@ export default function PostCarpoolRequest() {
           placeholder="Minimum 1 seat"
         />
       </div>
+
       <div className={styles.requestInput}>
         <label>Willing to pay:</label>
         <input
@@ -91,6 +115,7 @@ export default function PostCarpoolRequest() {
           step="5"
         />
       </div>
+
       <div className={styles.requestInput}>
         <label>Additional Message:</label>
         <textarea
@@ -99,6 +124,7 @@ export default function PostCarpoolRequest() {
           placeholder="Add any additional details or special instructions"
         ></textarea>
       </div>
+
       <button type="submit" className={styles.requestInput}>
         Request Carpool
       </button>

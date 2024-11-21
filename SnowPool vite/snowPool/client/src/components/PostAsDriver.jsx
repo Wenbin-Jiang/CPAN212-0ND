@@ -1,17 +1,26 @@
+// components/PostAsDriver.jsx
 import React, { useState, useEffect } from "react";
 import styles from "./PostAsDriver.module.css";
-import { useGoogleAutocomplete } from "../hooks/useGoogleAutocomplete";
+import { useGooglePlacesWithGeo } from "../hooks/useGooglePlacesWithGeo";
 
 export default function PostAsDriver() {
-  const [departure, setDeparture] = useState("");
-  const [destination, setDestination] = useState("");
+  const [departure, setDeparture] = useState({
+    address: "",
+    lat: null,
+    lng: null,
+  });
+  const [destination, setDestination] = useState({
+    address: "",
+    lat: null,
+    lng: null,
+  });
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [seatsAvailable, setSeatsAvailable] = useState(1);
   const [cost, setCost] = useState("");
   const [message, setMessage] = useState("");
 
-  const { initializeAutocomplete } = useGoogleAutocomplete();
+  const { initializeAutocomplete } = useGooglePlacesWithGeo();
 
   useEffect(() => {
     initializeAutocomplete("driver-departure", setDeparture);
@@ -21,8 +30,14 @@ export default function PostAsDriver() {
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log({
-      departure,
-      destination,
+      departure: {
+        address: departure.address,
+        coordinates: { lat: departure.lat, lng: departure.lng },
+      },
+      destination: {
+        address: destination.address,
+        coordinates: { lat: destination.lat, lng: destination.lng },
+      },
       date,
       time,
       seatsAvailable,
@@ -38,23 +53,29 @@ export default function PostAsDriver() {
         Cover your driving costs by filling your seats when you're driving to
         the slope.
       </h2>
+
       <div className={styles.requestInput}>
         <label>Origin:</label>
         <input
           id="driver-departure"
           type="text"
-          value={departure}
-          onChange={(e) => setDeparture(e.target.value)}
+          value={departure.address}
+          onChange={(e) =>
+            setDeparture({ ...departure, address: e.target.value })
+          }
           placeholder="Enter your departure location"
         />
       </div>
+
       <div className={styles.requestInput}>
         <label>Destination:</label>
         <input
           id="driver-destination"
           type="text"
-          value={destination}
-          onChange={(e) => setDestination(e.target.value)}
+          value={destination.address}
+          onChange={(e) =>
+            setDestination({ ...destination, address: e.target.value })
+          }
           placeholder="Enter your destination"
         />
       </div>
@@ -73,6 +94,7 @@ export default function PostAsDriver() {
           onChange={(e) => setTime(e.target.value)}
         />
       </div>
+
       <div className={styles.requestInput}>
         <label>Seats Available:</label>
         <input
@@ -82,6 +104,7 @@ export default function PostAsDriver() {
           min="1"
         />
       </div>
+
       <div className={styles.requestInput}>
         <label>Price per seat:</label>
         <input
@@ -93,6 +116,7 @@ export default function PostAsDriver() {
           step="5"
         />
       </div>
+
       <div className={styles.requestInput}>
         <label>Additional Message:</label>
         <textarea
@@ -101,6 +125,7 @@ export default function PostAsDriver() {
           placeholder="Add any additional details or special instructions"
         ></textarea>
       </div>
+
       <button type="submit">Post Ride</button>
     </form>
   );

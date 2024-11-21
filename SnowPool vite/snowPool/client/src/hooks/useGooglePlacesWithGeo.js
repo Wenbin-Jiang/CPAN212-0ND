@@ -1,8 +1,9 @@
+// hooks/useGooglePlacesWithGeo.js
 import { useEffect } from "react";
 
 const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
-export function useGoogleAutocomplete() {
+export function useGooglePlacesWithGeo() {
   useEffect(() => {
     const loadGoogleMapsScript = () => {
       const script = document.createElement("script");
@@ -35,13 +36,16 @@ export function useGoogleAutocomplete() {
     const autocomplete = new window.google.maps.places.Autocomplete(input, {
       componentRestrictions: { country: "ca" },
       fields: ["formatted_address", "geometry"],
-      types: ["geocode"],
     });
 
     autocomplete.addListener("place_changed", () => {
       const place = autocomplete.getPlace();
-      if (place.formatted_address) {
-        onPlaceSelected(place.formatted_address);
+      if (place.geometry) {
+        onPlaceSelected({
+          address: place.formatted_address,
+          lat: place.geometry.location.lat(),
+          lng: place.geometry.location.lng(),
+        });
       }
     });
   };
