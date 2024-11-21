@@ -21,15 +21,15 @@ app.get("/", (req, res) => res.send("Welcome to the Snowpool API"));
 
 // Importing routes
 const userRoutes = require("./routes/userRoutes");
-const tripRoutes = require("./routes/tripRoutes");
-const bookingRoutes = require("./routes/bookingRoutes");
-const paymentRoutes = require("./routes/paymentRoutes");
+// const tripRoutes = require("./routes/tripRoutes");
+// const bookingRoutes = require("./routes/bookingRoutes");
+// const paymentRoutes = require("./routes/paymentRoutes");
 
 // API Endpoints
 app.use("/api/users", userRoutes);
-app.use("/api/trips", tripRoutes);
-app.use("/api/bookings", bookingRoutes);
-app.use("/api/payments", paymentRoutes);
+// app.use("/api/trips", tripRoutes);
+// app.use("/api/bookings", bookingRoutes);
+// app.use("/api/payments", paymentRoutes);
 
 // Start server
 const PORT = process.env.PORT || 5000;

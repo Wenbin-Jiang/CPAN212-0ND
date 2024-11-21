@@ -2,6 +2,21 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const User = require("../models/userModel");
 
+// Helper function to check profile completion
+const checkProfileCompletion = (user) => {
+  return Boolean(
+    user.name &&
+      user.gender &&
+      user.address &&
+      user.phone &&
+      user.birthday &&
+      user.driverHistory &&
+      user.carModel &&
+      user.licensePlate &&
+      user.bio
+  );
+};
+
 // Register a New User
 const registerUser = async (req, res) => {
   try {
@@ -57,9 +72,7 @@ const loginUser = async (req, res) => {
     const token = jwt.sign(
       { id: user._id, email: user.email },
       process.env.JWT_SECRET,
-      {
-        expiresIn: process.env.JWT_EXPIRES_IN || "7d",
-      }
+      { expiresIn: process.env.JWT_EXPIRES_IN || "7d" }
     );
 
     res.status(200).json({
@@ -78,38 +91,48 @@ const updateUserProfile = async (req, res) => {
     const {
       name,
       address,
-      phoneNumber,
+      gender,
+      birthday,
+      phone,
       driverHistory,
       carModel,
       licensePlate,
       bio,
     } = req.body;
 
-    // Find and update the user
-    const user = await User.findByIdAndUpdate(
-      req.user.id,
-      {
-        name,
-        address,
-        phoneNumber,
-        driverHistory,
-        carModel,
-        licensePlate,
-        bio,
-      },
-      { new: true, runValidators: true }
-    );
-
+    // Find the authenticated user and update their profile
+    const user = await User.findById(req.user.id);
     if (!user) {
       return res
         .status(404)
         .json({ success: false, message: "User not found." });
     }
 
+    // Update user fields
+    user.name = name || user.name;
+    user.address = address || user.address;
+    user.gender = gender || user.gender;
+    user.birthday = birthday || user.birthday;
+    user.phone = phone || user.phone;
+    user.driverHistory = driverHistory || user.driverHistory;
+    user.carModel = carModel || user.carModel;
+    user.licensePlate = licensePlate || user.licensePlate;
+    user.bio = bio || user.bio;
+
+    // Check and update profile completion
+    user.profileComplete = checkProfileCompletion(user);
+
+    await user.save();
+
     res.status(200).json({
       success: true,
       message: "Profile updated successfully.",
-      data: user,
+      data: {
+        id: user._id,
+        name: user.name,
+        address: user.address,
+        profileComplete: user.profileComplete,
+      },
     });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
@@ -119,13 +142,30 @@ const updateUserProfile = async (req, res) => {
 // Get User Profile
 const getUserProfile = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).select("-password"); // Exclude password field
+    const user = await User.findById(req.user.id).select("-password"); // Exclude password
     if (!user) {
       return res
         .status(404)
         .json({ success: false, message: "User not found." });
     }
-    res.status(200).json({ success: true, data: user });
+
+    res.status(200).json({
+      success: true,
+      data: {
+        id: user._id,
+        email: user.email,
+        name: user.name,
+        address: user.address,
+        gender: user.gender,
+        birthday: user.birthday,
+        phone: user.birthday,
+        driverHistory: user.driverHistory,
+        carModel: user.carModel,
+        licensePlate: user.licensePlate,
+        bio: user.bio,
+        profileComplete: user.profileComplete,
+      },
+    });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }

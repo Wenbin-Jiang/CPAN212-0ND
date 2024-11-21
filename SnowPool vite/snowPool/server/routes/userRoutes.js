@@ -5,13 +5,13 @@ const {
   updateUserProfile,
   getUserProfile,
 } = require("../controllers/userController");
-const protect = require("../middleware/authMiddleware");
+const protectAndAuthorize = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
 // User routes
 router.post("/register", registerUser); // Public
 router.post("/login", loginUser); // Public
-router.put("/profile", protect, updateUserProfile); // Protected
-router.get("/profile", protect, getUserProfile); // Protected
+router.put("/profile", protectAndAuthorize, updateUserProfile); // Protected
+router.get("/profile", protectAndAuthorize, getUserProfile); // Protected
 module.exports = router;

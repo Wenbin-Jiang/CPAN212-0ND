@@ -3,7 +3,11 @@ const mongoose = require("mongoose");
 const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
+  profilePicture: { type: String }, // URL or file path
+  profileComplete: { type: Boolean, default: false },
   name: { type: String },
+  gender: { type: String },
+  birthday: { type: Date },
   address: { type: String },
   phone: { type: String },
   driverHistory: { type: String },

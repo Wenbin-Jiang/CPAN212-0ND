@@ -1,9 +1,8 @@
 const jwt = require("jsonwebtoken");
 
-const protect = (req, res, next) => {
-  // Check if the Authorization header exists
+const protectAndAuthorize = (req, res, next) => {
+  // Existing protect logic
   const authHeader = req.headers.authorization;
-
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
     return res.status(401).json({
       success: false,
@@ -11,9 +10,7 @@ const protect = (req, res, next) => {
     });
   }
 
-  // Extract the token from the Authorization header
   const token = authHeader.split(" ")[1];
-
   if (!token) {
     return res.status(401).json({
       success: false,
@@ -22,16 +19,20 @@ const protect = (req, res, next) => {
   }
 
   try {
-    // Verify the token and decode the payload
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-    // Attach the user info to the request object
     req.user = decoded;
 
-    // Proceed to the next middleware or route handler
+    // Authorization check for specific routes
+    const userIdFromRequest = req.params.id || req.body.id; // Adjust for route structure
+    if (userIdFromRequest && userIdFromRequest !== req.user.id) {
+      return res.status(403).json({
+        success: false,
+        message: "You are not authorized to access this resource.",
+      });
+    }
+
     next();
   } catch (err) {
-    // Handle specific JWT errors
     let errorMessage = "Invalid token.";
     if (err.name === "TokenExpiredError") {
       errorMessage = "Token has expired.";
@@ -39,7 +40,7 @@ const protect = (req, res, next) => {
       errorMessage = "Malformed token.";
     }
 
-    console.error("JWT verification failed:", err.message); // Debugging log
+    console.error("JWT verification failed:", err.message);
     return res.status(401).json({
       success: false,
       message: errorMessage,
@@ -47,4 +48,4 @@ const protect = (req, res, next) => {
   }
 };
 
-module.exports = protect;
+module.exports = protectAndAuthorize;

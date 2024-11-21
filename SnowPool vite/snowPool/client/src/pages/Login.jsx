@@ -29,9 +29,22 @@ export default function Login() {
       // Store token in local storage or session storage
       localStorage.setItem("authToken", token);
 
-      alert(`Logged in as ${email}`);
-      // Redirect user to dashboard or homepage
-      navigate("/dashboard"); // Or use a routing library to navigate
+      // Fetch the user profile to check if it's complete
+      const profileResponse = await axios.get(`${baseURL}/api/users/profile`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const { profileComplete } = profileResponse.data.data; // Assuming profileComplete is returned in the response
+
+      if (profileComplete) {
+        // Redirect to dashboard if profile is complete
+        navigate("/dashboard");
+      } else {
+        // Redirect to profile page to complete profile
+        navigate("/userprofile");
+      }
     } catch (err) {
       setError("Invalid credentials. Please try again.");
       console.error(err);
