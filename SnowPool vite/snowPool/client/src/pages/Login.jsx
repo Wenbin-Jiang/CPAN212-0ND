@@ -3,16 +3,39 @@ import PageNav from "../components/PageNav";
 import Footer from "../components/Footer";
 import ForgotPassword from "../components/ForgotPassword";
 import SignUp from "../components/SignUp";
+import axios from "axios";
 import styles from "./Login.module.css";
+import { useNavigate } from "react-router-dom";
+const baseURL = "http://localhost:8001";
 
 export default function Login() {
   const [view, setView] = useState("login"); // "login", "forgotPassword", or "signUp"
-  const [email, setEmail] = useState("jack@example.com");
-  const [password, setPassword] = useState("qwerty");
+  const [email, setEmail] = useState("user2@example.com");
+  const [password, setPassword] = useState("password2");
+  const [error, setError] = useState(""); // State to store error messages
 
-  const handleLogin = (e) => {
+  const navigate = useNavigate();
+
+  const handleLogin = async (e) => {
     e.preventDefault();
-    alert(`Logged in as ${email}`);
+
+    try {
+      const response = await axios.post(`${baseURL}/api/users/login`, {
+        email,
+        password,
+      }); // Send login data to backend
+      const { token } = response.data;
+
+      // Store token in local storage or session storage
+      localStorage.setItem("authToken", token);
+
+      alert(`Logged in as ${email}`);
+      // Redirect user to dashboard or homepage
+      navigate("/dashboard"); // Or use a routing library to navigate
+    } catch (err) {
+      setError("Invalid credentials. Please try again.");
+      console.error(err);
+    }
   };
 
   return (
@@ -41,6 +64,8 @@ export default function Login() {
                 required
               />
             </div>
+            {error && <div className={styles.error}>{error}</div>}{" "}
+            {/* Display error message */}
             <div className={styles.buttons}>
               <button type="submit">Login</button>
               <h5 onClick={() => setView("forgotPassword")}>
