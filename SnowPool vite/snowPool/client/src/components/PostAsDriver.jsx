@@ -1,4 +1,3 @@
-// components/PostAsDriver.jsx
 import React, { useState, useEffect } from "react";
 import styles from "./PostAsDriver.module.css";
 import { useGooglePlacesWithGeo } from "../hooks/useGooglePlacesWithGeo";
@@ -25,7 +24,7 @@ export default function PostAsDriver() {
   useEffect(() => {
     initializeAutocomplete("driver-departure", setDeparture);
     initializeAutocomplete("driver-destination", setDestination);
-  }, []);
+  }, [initializeAutocomplete]);
 
   const handleSubmit = (e) => {
     e.preventDefault();

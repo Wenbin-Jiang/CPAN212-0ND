@@ -1,9 +1,9 @@
-// components/PostCarpoolRequest.jsx
 import React, { useState, useEffect } from "react";
 import styles from "./PostCarpoolRequest.module.css";
 import { useGooglePlacesWithGeo } from "../hooks/useGooglePlacesWithGeo";
 
 export default function PostCarpoolRequest() {
+  // Group all state declarations
   const [pickupLocation, setPickupLocation] = useState({
     address: "",
     lat: null,
@@ -16,16 +16,21 @@ export default function PostCarpoolRequest() {
   });
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
-  const [seatRequired, setSeatRequired] = useState("");
+  const [seatRequired, setSeatRequired] = useState(1); // Set default value to 1
   const [willingToPay, setWillingToPay] = useState("");
   const [message, setMessage] = useState("");
 
+  // Custom hooks after state declarations
   const { initializeAutocomplete } = useGooglePlacesWithGeo();
 
-  useEffect(() => {
-    initializeAutocomplete("request-pickup", setPickupLocation);
-    initializeAutocomplete("request-dropoff", setDropoffLocation);
-  }, []);
+  // Event handlers
+  const handlePickupChange = (e) => {
+    setPickupLocation({ ...pickupLocation, address: e.target.value });
+  };
+
+  const handleDropoffChange = (e) => {
+    setDropoffLocation({ ...dropoffLocation, address: e.target.value });
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -46,47 +51,50 @@ export default function PostCarpoolRequest() {
     });
   };
 
+  // Effects last
+  useEffect(() => {
+    initializeAutocomplete("request-pickup", setPickupLocation);
+    initializeAutocomplete("request-dropoff", setDropoffLocation);
+  }, [initializeAutocomplete]);
+
   return (
     <form onSubmit={handleSubmit} className={styles.formContainer}>
       <h1>Request a Carpool</h1>
       <h2>Get notified when new trips match your travel needs</h2>
 
       <div className={styles.requestInput}>
-        <label>Origin:</label>
+        <label htmlFor="request-pickup">Origin:</label>
         <input
           id="request-pickup"
           type="text"
           value={pickupLocation.address}
-          onChange={(e) =>
-            setPickupLocation({ ...pickupLocation, address: e.target.value })
-          }
+          onChange={handlePickupChange}
           placeholder="Enter your pickup location"
         />
       </div>
 
       <div className={styles.requestInput}>
-        <label>Destination:</label>
+        <label htmlFor="request-dropoff">Destination:</label>
         <input
           id="request-dropoff"
           type="text"
           value={dropoffLocation.address}
-          onChange={(e) =>
-            setDropoffLocation({ ...dropoffLocation, address: e.target.value })
-          }
+          onChange={handleDropoffChange}
           placeholder="Enter your dropoff location"
         />
       </div>
 
-      {/* Rest of the form remains the same */}
       <div className={styles.requestInput}>
-        <label>Date:</label>
+        <label htmlFor="date">Date:</label>
         <input
+          id="date"
           type="date"
           value={date}
           onChange={(e) => setDate(e.target.value)}
         />
         <p>At</p>
         <input
+          id="time"
           type="time"
           value={time}
           onChange={(e) => setTime(e.target.value)}
@@ -94,8 +102,9 @@ export default function PostCarpoolRequest() {
       </div>
 
       <div className={styles.requestInput}>
-        <label>Seat Required:</label>
+        <label htmlFor="seats">Seat Required:</label>
         <input
+          id="seats"
           type="number"
           value={seatRequired}
           onChange={(e) => setSeatRequired(e.target.value)}
@@ -105,8 +114,9 @@ export default function PostCarpoolRequest() {
       </div>
 
       <div className={styles.requestInput}>
-        <label>Willing to pay:</label>
+        <label htmlFor="payment">Willing to pay:</label>
         <input
+          id="payment"
           type="number"
           value={willingToPay}
           onChange={(e) => setWillingToPay(e.target.value)}
@@ -117,17 +127,16 @@ export default function PostCarpoolRequest() {
       </div>
 
       <div className={styles.requestInput}>
-        <label>Additional Message:</label>
+        <label htmlFor="message">Additional Message:</label>
         <textarea
+          id="message"
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           placeholder="Add any additional details or special instructions"
-        ></textarea>
+        />
       </div>
 
-      <button type="submit" className={styles.requestInput}>
-        Request Carpool
-      </button>
+      <button type="submit">Request Carpool</button>
     </form>
   );
 }
