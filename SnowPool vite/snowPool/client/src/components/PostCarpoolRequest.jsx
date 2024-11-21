@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styles from "./PostCarpoolRequest.module.css";
+import { useGoogleAutocomplete } from "../hooks/useGoogleAutocomplete";
 
 export default function PostCarpoolRequest() {
   const [pickupLocation, setPickupLocation] = useState("");
@@ -10,9 +11,15 @@ export default function PostCarpoolRequest() {
   const [willingToPay, setWillingToPay] = useState("");
   const [message, setMessage] = useState("");
 
+  const { initializeAutocomplete } = useGoogleAutocomplete();
+
+  useEffect(() => {
+    initializeAutocomplete("request-pickup", setPickupLocation);
+    initializeAutocomplete("request-dropoff", setDropoffLocation);
+  }, []);
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Process the form data
     console.log({
       pickupLocation,
       dropoffLocation,
@@ -31,6 +38,7 @@ export default function PostCarpoolRequest() {
       <div className={styles.requestInput}>
         <label>Origin:</label>
         <input
+          id="request-pickup"
           type="text"
           value={pickupLocation}
           onChange={(e) => setPickupLocation(e.target.value)}
@@ -40,12 +48,14 @@ export default function PostCarpoolRequest() {
       <div className={styles.requestInput}>
         <label>Destination:</label>
         <input
+          id="request-dropoff"
           type="text"
           value={dropoffLocation}
           onChange={(e) => setDropoffLocation(e.target.value)}
           placeholder="Enter your dropoff location"
         />
       </div>
+
       <div className={styles.requestInput}>
         <label>Date:</label>
         <input

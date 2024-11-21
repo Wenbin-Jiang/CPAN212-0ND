@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styles from "./PostAsDriver.module.css";
+import { useGoogleAutocomplete } from "../hooks/useGoogleAutocomplete";
 
 export default function PostAsDriver() {
   const [departure, setDeparture] = useState("");
@@ -9,6 +10,13 @@ export default function PostAsDriver() {
   const [seatsAvailable, setSeatsAvailable] = useState(1);
   const [cost, setCost] = useState("");
   const [message, setMessage] = useState("");
+
+  const { initializeAutocomplete } = useGoogleAutocomplete();
+
+  useEffect(() => {
+    initializeAutocomplete("driver-departure", setDeparture);
+    initializeAutocomplete("driver-destination", setDestination);
+  }, []);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -27,12 +35,13 @@ export default function PostAsDriver() {
     <form onSubmit={handleSubmit} className={styles.formContainer}>
       <h1>Post a Ride as Driver</h1>
       <h2>
-        Cover your driving costs by filling your seats when you’re driving to
+        Cover your driving costs by filling your seats when you're driving to
         the slope.
       </h2>
       <div className={styles.requestInput}>
         <label>Origin:</label>
         <input
+          id="driver-departure"
           type="text"
           value={departure}
           onChange={(e) => setDeparture(e.target.value)}
@@ -42,12 +51,14 @@ export default function PostAsDriver() {
       <div className={styles.requestInput}>
         <label>Destination:</label>
         <input
+          id="driver-destination"
           type="text"
           value={destination}
           onChange={(e) => setDestination(e.target.value)}
           placeholder="Enter your destination"
         />
       </div>
+
       <div className={styles.requestInput}>
         <label>Leaving:</label>
         <input
