@@ -79,7 +79,7 @@ export default function PostAsDriver() {
           onChange={(e) => setCost(e.target.value)}
           placeholder="Enter the cost in dollars"
           min="0"
-          step="0.01"
+          step="5"
         />
       </div>
       <div className={styles.requestInput}>

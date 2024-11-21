@@ -1,5 +1,5 @@
 .formContainer {
-  width: 50%;
+  width: 70%;
   height: auto;
   margin: 0 10%;
   display: flex;
@@ -12,8 +12,15 @@
 }
 
 .formContainer h2 {
-  margin-bottom: 45px;
+  margin-bottom: 40px;
   font-weight: 700;
+}
+
+.formContainer p {
+  font-size: 15px;
+  align-self: center;
+  padding: 0 1rem;
+  font-weight: bold;
 }
 
 .formContainer div {
@@ -28,7 +35,7 @@
 }
 
 .formContainer input {
-  width: 35%;
+  width: 28%;
   padding: 10px;
   border-radius: 10px;
   border: 1px solid #ccc;

@@ -6,6 +6,8 @@ export default function PostCarpoolRequest() {
   const [dropoffLocation, setDropoffLocation] = useState("");
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
+  const [seatRequired, setSeatRequired] = useState("");
+  const [willingToPay, setWillingToPay] = useState("");
   const [message, setMessage] = useState("");
 
   const handleSubmit = (e) => {
@@ -16,6 +18,8 @@ export default function PostCarpoolRequest() {
       dropoffLocation,
       date,
       time,
+      seatRequired,
+      willingToPay,
       message,
     });
   };
@@ -49,13 +53,32 @@ export default function PostCarpoolRequest() {
           value={date}
           onChange={(e) => setDate(e.target.value)}
         />
-      </div>
-      <div className={styles.requestInput}>
-        <label>Pickup Time:</label>
+        <p>At</p>
         <input
           type="time"
           value={time}
           onChange={(e) => setTime(e.target.value)}
+        />
+      </div>
+      <div className={styles.requestInput}>
+        <label>Seat Required:</label>
+        <input
+          type="number"
+          value={seatRequired}
+          onChange={(e) => setSeatRequired(e.target.value)}
+          min="1"
+          placeholder="Minimum 1 seat"
+        />
+      </div>
+      <div className={styles.requestInput}>
+        <label>Willing to pay:</label>
+        <input
+          type="number"
+          value={willingToPay}
+          onChange={(e) => setWillingToPay(e.target.value)}
+          placeholder="$ / Seat"
+          min="0"
+          step="5"
         />
       </div>
       <div className={styles.requestInput}>
