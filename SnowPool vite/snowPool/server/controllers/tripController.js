@@ -1,134 +1,163 @@
-const DriverTrip = require("../models/driverTripModal");
-const PassengerRequest = require("../models/passengerRequest");
+const Trip = require("../models/tripsModal");
 
-// Driver Trip Handlers
-const createDriverTrip = async (req, res) => {
+// Create=
+
+const createTrip = async (req, res) => {
   try {
-    const trip = new DriverTrip({ ...req.body, driver: req.user.id });
+    console.log("Request body:", req.body); // Debug log
+    console.log("User:", req.user); // Debug log
+
+    const trip = new Trip({
+      ...req.body,
+      user: req.user.id,
+    });
+
+    console.log("Trip to save:", trip); // Debug log
+
     const savedTrip = await trip.save();
     res.status(201).json(savedTrip);
   } catch (error) {
-    res.status(500).json({ message: "Error creating driver trip", error });
+    console.error("Error details:", error); // Debug log
+    res.status(500).json({
+      message: "Error creating trip",
+      error: error.message,
+    });
   }
 };
 
-const getAllDriverTrips = async (req, res) => {
+// Read
+const getAllTrips = async (req, res) => {
   try {
-    const trips = await DriverTrip.find().populate("driver", "name");
+    const trips = await Trip.find()
+      .populate("user", "name")
+      .sort({ createdAt: -1 });
     res.status(200).json(trips);
   } catch (error) {
-    res.status(500).json({ message: "Error fetching driver trips", error });
+    res.status(500).json({ message: "Error fetching trips" });
   }
 };
 
-const editDriverTrip = async (req, res) => {
+const getMyTrips = async (req, res) => {
   try {
-    const updatedTrip = await DriverTrip.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true }
-    );
+    const trips = await Trip.find({ user: req.user.id })
+      .populate("user", "name")
+      .sort({ createdAt: -1 });
+    res.status(200).json(trips);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching your trips" });
+  }
+};
+
+const getTripById = async (req, res) => {
+  try {
+    const trip = await Trip.findById(req.params.id).populate("user", "name");
+
+    if (!trip) {
+      return res.status(404).json({ message: "Trip not found" });
+    }
+
+    res.status(200).json(trip);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching trip" });
+  }
+};
+
+const getTripsByType = async (req, res) => {
+  try {
+    const { tripType } = req.params;
+
+    if (!["driver", "passenger"].includes(tripType)) {
+      return res.status(400).json({
+        message: "Invalid trip type. Must be 'driver' or 'passenger'",
+      });
+    }
+
+    const trips = await Trip.find({ tripType })
+      .populate("user", "name")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json(trips);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching trips" });
+  }
+};
+
+// Update
+const updateTrip = async (req, res) => {
+  try {
+    const trip = await Trip.findOne({
+      _id: req.params.id,
+      user: req.user.id,
+    });
+
+    if (!trip) {
+      return res
+        .status(404)
+        .json({ message: "Trip not found or unauthorized" });
+    }
+
+    const updatedTrip = await Trip.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+    });
     res.status(200).json(updatedTrip);
   } catch (error) {
-    res.status(500).json({ message: "Error updating driver trip", error });
+    res.status(500).json({ message: "Error updating trip" });
   }
 };
 
-const deleteDriverTrip = async (req, res) => {
+// Delete
+const deleteTrip = async (req, res) => {
   try {
-    await DriverTrip.findByIdAndDelete(req.params.id);
-    res.status(200).json({ message: "Driver trip deleted successfully" });
-  } catch (error) {
-    res.status(500).json({ message: "Error deleting driver trip", error });
-  }
-};
-
-// Passenger Request Handlers
-const createPassengerRequest = async (req, res) => {
-  try {
-    const request = new PassengerRequest({
-      ...req.body,
-      passenger: req.user.id,
+    const trip = await Trip.findOne({
+      _id: req.params.id,
+      user: req.user.id,
     });
-    const savedRequest = await request.save();
-    res.status(201).json(savedRequest);
+
+    if (!trip) {
+      return res
+        .status(404)
+        .json({ message: "Trip not found or unauthorized" });
+    }
+
+    await Trip.findByIdAndDelete(req.params.id);
+    res.status(200).json({ message: "Trip deleted successfully" });
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Error creating passenger request", error });
+    res.status(500).json({ message: "Error deleting trip" });
   }
 };
 
-const getAllPassengerRequests = async (req, res) => {
-  try {
-    const requests = await PassengerRequest.find().populate(
-      "passenger",
-      "name"
-    );
-    res.status(200).json(requests);
-  } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Error fetching passenger requests", error });
-  }
-};
-
-const editPassengerRequest = async (req, res) => {
-  try {
-    const updatedRequest = await PassengerRequest.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true }
-    );
-    res.status(200).json(updatedRequest);
-  } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Error updating passenger request", error });
-  }
-};
-
-const deletePassengerRequest = async (req, res) => {
-  try {
-    await PassengerRequest.findByIdAndDelete(req.params.id);
-    res.status(200).json({ message: "Passenger request deleted successfully" });
-  } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Error deleting passenger request", error });
-  }
-};
-
-// Unified Search
+// Search
 const searchTrips = async (req, res) => {
   try {
-    const { origin, destination, date } = req.query;
+    const { origin, destination, date, tripType } = req.query;
 
-    const driverTrips = await DriverTrip.find({
+    const query = {
       origin: new RegExp(origin, "i"),
       destination: new RegExp(destination, "i"),
       date: date ? new Date(date) : { $exists: true },
-    });
+    };
 
-    const passengerRequests = await PassengerRequest.find({
-      origin: new RegExp(origin, "i"),
-      destination: new RegExp(destination, "i"),
-      date: date ? new Date(date) : { $exists: true },
-    });
+    if (tripType) {
+      query.tripType = tripType;
+    }
 
-    res.status(200).json({ driverTrips, passengerRequests });
+    const trips = await Trip.find(query)
+      .populate("user", "name")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json(trips);
   } catch (error) {
-    res.status(500).json({ message: "Error searching trips", error });
+    res.status(500).json({ message: "Error searching trips" });
   }
 };
+
 module.exports = {
-  createDriverTrip,
-  getAllDriverTrips,
-  editDriverTrip,
-  deleteDriverTrip,
-  createPassengerRequest,
-  getAllPassengerRequests,
-  editPassengerRequest,
-  deletePassengerRequest,
+  createTrip,
+  getAllTrips,
+  getMyTrips,
+  getTripById,
+  getTripsByType,
+  updateTrip,
+  deleteTrip,
   searchTrips,
 };
