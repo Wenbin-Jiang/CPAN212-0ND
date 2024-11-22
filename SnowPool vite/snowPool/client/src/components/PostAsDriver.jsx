@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from "react";
+import axios from "axios"; // Add this import
 import styles from "./PostAsDriver.module.css";
 import { useGooglePlacesWithGeo } from "../hooks/useGooglePlacesWithGeo";
+
+const baseURL = "http://localhost:8001";
 
 export default function PostAsDriver() {
   const [departure, setDeparture] = useState({
@@ -18,6 +21,8 @@ export default function PostAsDriver() {
   const [seatsAvailable, setSeatsAvailable] = useState(1);
   const [cost, setCost] = useState("");
   const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const { initializeAutocomplete } = useGooglePlacesWithGeo();
 
@@ -26,23 +31,95 @@ export default function PostAsDriver() {
     initializeAutocomplete("driver-destination", setDestination);
   }, [initializeAutocomplete]);
 
-  const handleSubmit = (e) => {
+  const validateForm = () => {
+    if (!departure.address || !departure.lat || !departure.lng) {
+      throw new Error("Please select a valid departure location");
+    }
+    if (!destination.address || !destination.lat || !destination.lng) {
+      throw new Error("Please select a valid destination");
+    }
+    if (!date) {
+      throw new Error("Please select a date");
+    }
+    if (!time) {
+      throw new Error("Please select a time");
+    }
+    if (!seatsAvailable || seatsAvailable < 1) {
+      throw new Error("Please enter valid number of seats");
+    }
+    if (!cost || cost < 0) {
+      throw new Error("Please enter a valid price");
+    }
+  };
+
+  const resetForm = () => {
+    setDeparture({ address: "", lat: null, lng: null });
+    setDestination({ address: "", lat: null, lng: null });
+    setDate("");
+    setTime("");
+    setSeatsAvailable(1);
+    setCost("");
+    setMessage("");
+    setError("");
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log({
-      departure: {
-        address: departure.address,
-        coordinates: { lat: departure.lat, lng: departure.lng },
-      },
-      destination: {
-        address: destination.address,
-        coordinates: { lat: destination.lat, lng: destination.lng },
-      },
-      date,
-      time,
-      seatsAvailable,
-      cost,
-      message,
-    });
+    setError("");
+    setIsLoading(true);
+
+    try {
+      validateForm();
+
+      const token = localStorage.getItem("authToken");
+      if (!token) {
+        throw new Error("Authentication required");
+      }
+
+      const tripData = {
+        origin: departure.address,
+        originLatLng: [departure.lat, departure.lng],
+        destination: destination.address,
+        destinationLatLng: [destination.lat, destination.lng],
+        date,
+        time,
+        seatsAvailable: parseInt(seatsAvailable),
+        pricePerSeat: parseInt(cost),
+        additionalMessage: message,
+      };
+
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      };
+
+      const response = await axios.post(
+        `${baseURL}/api/trips/driver`,
+        tripData,
+        config
+      );
+
+      if (response.data) {
+        alert("Trip created successfully!");
+        resetForm();
+      }
+    } catch (error) {
+      if (error.response) {
+        // Server responded with error
+        setError(error.response.data.message || "Server error occurred");
+      } else if (error.request) {
+        // Request made but no response
+        setError("No response from server");
+      } else {
+        // Other errors
+        setError(error.message || "Failed to create trip");
+      }
+      console.error("Error details:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -122,10 +199,18 @@ export default function PostAsDriver() {
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           placeholder="Add any additional details or special instructions"
-        ></textarea>
+        />
       </div>
 
-      <button type="submit">Post Ride</button>
+      {error && <div className={styles.errorMessage}>{error}</div>}
+
+      <button
+        type="submit"
+        disabled={isLoading}
+        className={styles.submitButton}
+      >
+        {isLoading ? "Creating..." : "Post Ride"}
+      </button>
     </form>
   );
 }

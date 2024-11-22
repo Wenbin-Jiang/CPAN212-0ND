@@ -15,7 +15,7 @@ function SearchBox() {
   useEffect(() => {
     initializeAutocomplete("origin-input", setFrom);
     initializeAutocomplete("destination-input", setTo);
-  }, []);
+  }, [initializeAutocomplete]);
 
   const handleSearch = () => {
     if (!from.address || !to.address || !date) {

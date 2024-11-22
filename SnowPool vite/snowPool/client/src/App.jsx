@@ -17,7 +17,12 @@ function App() {
   return (
     <div>
       <UserProvider>
-        <BrowserRouter>
+        <BrowserRouter
+          future={{
+            v7_startTransition: true,
+            v7_relativeSplatPath: true,
+          }}
+        >
           <Routes>
             <Route index element={<Homepage />} />
             <Route path="findride" element={<FindRide />} />

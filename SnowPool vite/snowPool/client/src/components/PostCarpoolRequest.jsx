@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
+import axios from "axios";
 import styles from "./PostCarpoolRequest.module.css";
 import { useGooglePlacesWithGeo } from "../hooks/useGooglePlacesWithGeo";
 
+const baseURL = "http://localhost:8001";
+
 export default function PostCarpoolRequest() {
-  // Group all state declarations
   const [pickupLocation, setPickupLocation] = useState({
     address: "",
     lat: null,
@@ -16,42 +18,106 @@ export default function PostCarpoolRequest() {
   });
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
-  const [seatRequired, setSeatRequired] = useState(1); // Set default value to 1
+  const [seatRequired, setSeatRequired] = useState(1);
   const [willingToPay, setWillingToPay] = useState("");
   const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Custom hooks after state declarations
   const { initializeAutocomplete } = useGooglePlacesWithGeo();
 
-  // Event handlers
-  const handlePickupChange = (e) => {
-    setPickupLocation({ ...pickupLocation, address: e.target.value });
+  const validateForm = () => {
+    if (!pickupLocation.address || !pickupLocation.lat || !pickupLocation.lng) {
+      throw new Error("Please select a valid pickup location");
+    }
+    if (
+      !dropoffLocation.address ||
+      !dropoffLocation.lat ||
+      !dropoffLocation.lng
+    ) {
+      throw new Error("Please select a valid dropoff location");
+    }
+    if (!date) {
+      throw new Error("Please select a date");
+    }
+    if (!time) {
+      throw new Error("Please select a time");
+    }
+    if (!seatRequired || seatRequired < 1) {
+      throw new Error("Please enter valid number of seats");
+    }
+    if (!willingToPay || willingToPay < 0) {
+      throw new Error("Please enter a valid amount you're willing to pay");
+    }
   };
 
-  const handleDropoffChange = (e) => {
-    setDropoffLocation({ ...dropoffLocation, address: e.target.value });
+  const resetForm = () => {
+    setPickupLocation({ address: "", lat: null, lng: null });
+    setDropoffLocation({ address: "", lat: null, lng: null });
+    setDate("");
+    setTime("");
+    setSeatRequired(1);
+    setWillingToPay("");
+    setMessage("");
+    setError("");
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log({
-      pickup: {
-        address: pickupLocation.address,
-        coordinates: { lat: pickupLocation.lat, lng: pickupLocation.lng },
-      },
-      dropoff: {
-        address: dropoffLocation.address,
-        coordinates: { lat: dropoffLocation.lat, lng: dropoffLocation.lng },
-      },
-      date,
-      time,
-      seatRequired,
-      willingToPay,
-      message,
-    });
+    setError("");
+    setIsLoading(true);
+
+    try {
+      validateForm();
+
+      const token = localStorage.getItem("authToken");
+      if (!token) {
+        throw new Error("Authentication required");
+      }
+
+      const requestData = {
+        origin: pickupLocation.address,
+        originLatLng: [pickupLocation.lat, pickupLocation.lng],
+        destination: dropoffLocation.address,
+        destinationLatLng: [dropoffLocation.lat, dropoffLocation.lng],
+        date,
+        time,
+        seatsRequired: parseInt(seatRequired),
+        willingToPay: parseInt(willingToPay),
+        additionalMessage: message,
+      };
+
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      };
+
+      const response = await axios.post(
+        `${baseURL}/api/trips/passenger`,
+        requestData,
+        config
+      );
+
+      if (response.data) {
+        alert("Carpool request created successfully!");
+        resetForm();
+      }
+    } catch (error) {
+      if (error.response) {
+        setError(error.response.data.message || "Server error occurred");
+      } else if (error.request) {
+        setError("No response from server");
+      } else {
+        setError(error.message || "Failed to create request");
+      }
+      console.error("Error details:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  // Effects last
   useEffect(() => {
     initializeAutocomplete("request-pickup", setPickupLocation);
     initializeAutocomplete("request-dropoff", setDropoffLocation);
@@ -68,7 +134,9 @@ export default function PostCarpoolRequest() {
           id="request-pickup"
           type="text"
           value={pickupLocation.address}
-          onChange={handlePickupChange}
+          onChange={(e) =>
+            setPickupLocation({ ...pickupLocation, address: e.target.value })
+          }
           placeholder="Enter your pickup location"
         />
       </div>
@@ -79,7 +147,9 @@ export default function PostCarpoolRequest() {
           id="request-dropoff"
           type="text"
           value={dropoffLocation.address}
-          onChange={handleDropoffChange}
+          onChange={(e) =>
+            setDropoffLocation({ ...dropoffLocation, address: e.target.value })
+          }
           placeholder="Enter your dropoff location"
         />
       </div>
@@ -92,7 +162,7 @@ export default function PostCarpoolRequest() {
           value={date}
           onChange={(e) => setDate(e.target.value)}
         />
-        <p>At</p>
+        <p>at</p>
         <input
           id="time"
           type="time"
@@ -136,7 +206,15 @@ export default function PostCarpoolRequest() {
         />
       </div>
 
-      <button type="submit">Request Carpool</button>
+      {error && <div className={styles.errorMessage}>{error}</div>}
+
+      <button
+        type="submit"
+        disabled={isLoading}
+        className={styles.submitButton}
+      >
+        {isLoading ? "Creating Request..." : "Request Carpool"}
+      </button>
     </form>
   );
 }
