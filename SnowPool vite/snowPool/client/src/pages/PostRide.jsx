@@ -5,7 +5,7 @@ import PageNav from "../components/PageNav";
 import PostAsDriver from "../components/PostAsDriver";
 import PostCarpoolRequest from "../components/PostCarpoolRequest";
 import styles from "./PostRide.module.css";
-import { useUserContext } from "../contexts/UserContext"; // Adjust the import path as needed
+import { useUserContext } from "../contexts/UserContext";
 
 function PostRide() {
   const [selectedOption, setSelectedOption] = useState(null);

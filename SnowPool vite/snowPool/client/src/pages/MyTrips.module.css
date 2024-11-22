@@ -1,0 +1,99 @@
+.trips {
+  margin: 2.5rem;
+  padding: 2.5rem 5rem;
+  min-height: calc(100vh - 5rem);
+  background-image: linear-gradient(
+      rgba(166, 168, 172, 0.293),
+      rgba(106, 108, 110, 0.798)
+    ),
+    url("../postridebg.jpeg");
+  background-size: cover;
+  background-position: center;
+}
+
+.tabs {
+  width: 50%;
+  display: flex;
+  gap: 20px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid #eee;
+}
+
+.tab {
+  padding: 12px 24px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 16px;
+  color: #666;
+}
+
+.tab.active {
+  color: #0084ff;
+  border-bottom: 2px solid #0084ff;
+}
+
+.tripCard {
+  width: 50%;
+  background: rgba(255, 255, 255, 0.422);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.tripHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  color: #131314;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+}
+
+.editButton,
+.deleteButton {
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  margin-top: 2rem;
+}
+
+.editButton {
+  background: #0084ff;
+  color: white;
+}
+
+.deleteButton {
+  background: #dc3545;
+  color: white;
+}
+
+.empty {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+}
+
+.postLink {
+  color: #0084ff;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.error {
+  color: #dc3545;
+  background: #f8d7da;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.deleteButton:hover {
+  background-color: #d32f2f;
+}

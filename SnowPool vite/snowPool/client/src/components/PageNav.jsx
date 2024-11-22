@@ -40,8 +40,8 @@ function PageNav() {
               </NavLink>
             </li>
             <li>
-              <NavLink to="/trips">
-                <i className="fas fa-car"></i> Trips
+              <NavLink to="/mytrips">
+                <i className="fas fa-map"></i> My Trips
               </NavLink>
             </li>
             <li>

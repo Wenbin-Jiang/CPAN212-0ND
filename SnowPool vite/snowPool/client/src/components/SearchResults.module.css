@@ -1,104 +1,45 @@
-/* SearchResults.module.css */
-.resultsContainer {
-  padding: 20px;
-  max-width: 800px;
+.searchResults {
+  max-width: 75%;
   margin: 0 auto;
+  padding: 20px;
 }
 
 .resultsHeader {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
+  justify-self: center;
+  margin-bottom: 24px;
 }
-
-.tripCard {
-  display: flex;
-  gap: 20px;
-  padding: 20px;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  margin-bottom: 20px;
-}
-
-.driverInfo {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  min-width: 120px;
-}
-
-.driverPhoto {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  margin-bottom: 10px;
-}
-
-.driverDetails {
-  text-align: center;
-}
-
-.rating {
+.dateHeader {
   color: #666;
-  font-size: 0.9em;
+  font-size: 16px;
+  margin: 24px 0 16px;
 }
-
-.noRating {
-  color: #666;
-  font-size: 0.9em;
-}
-
-.tripDetails {
-  flex: 1;
-}
-
-.tripInfo {
-  display: flex;
-  gap: 40px;
-  margin: 15px 0;
-}
-
-.locationDetails {
-  margin: 15px 0;
-}
-
-.tripFooter {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 20px;
-}
-
-.preferences {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-}
-
-.preferenceIcons {
-  display: flex;
-  gap: 5px;
-}
-
-.pricing {
-  text-align: right;
-}
-
-.price {
-  font-size: 1.5em;
-  font-weight: bold;
-  color: #0066cc;
-  display: block;
-}
-
-.seats {
-  color: #666;
-}
-
 .noResults {
-  text-align: center;
+  background: rgba(255, 255, 255, 0.513);
+  border-radius: 12px;
   padding: 40px;
+  text-align: center;
+  margin: 20px auto;
+  max-width: 600px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.noResultsContent h3 {
+  color: #333;
+  margin-bottom: 16px;
+}
+
+.noResultsContent p {
   color: #666;
+  margin-bottom: 16px;
+}
+
+.noResultsContent ul {
+  list-style: none;
+  padding: 0;
+  color: #666;
+}
+
+.noResultsContent li {
+  margin: 8px 0;
 }

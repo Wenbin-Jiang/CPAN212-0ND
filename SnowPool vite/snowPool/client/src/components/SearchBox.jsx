@@ -19,11 +19,13 @@ function SearchBox({ onSearch, isLoading }) {
   const validateSearch = () => {
     setError("");
 
+    // Destination validation
     if (!to.address || !to.lat || !to.lng) {
       setError("Please select a destination");
       return false;
     }
 
+    // Date validation
     if (!date) {
       setError("Please select a date");
       return false;
@@ -31,10 +33,13 @@ function SearchBox({ onSearch, isLoading }) {
 
     const selectedDate = new Date(date);
     const today = new Date();
+
+    selectedDate.setHours(0, 0, 0, 0);
     today.setHours(0, 0, 0, 0);
 
+    // Allow today's date but prevent past dates
     if (selectedDate < today) {
-      setError("Please select a future date");
+      setError("Please select today or a future date");
       return false;
     }
 

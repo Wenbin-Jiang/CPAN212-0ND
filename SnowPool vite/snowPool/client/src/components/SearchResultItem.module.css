@@ -1,0 +1,129 @@
+.tripCard {
+  display: flex;
+  gap: 24px;
+  background: rgba(255, 255, 255, 0.529);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.driverSection {
+  width: 100px;
+  text-align: center;
+}
+
+.driverPhoto {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  margin-bottom: 8px;
+}
+
+.driverInfo h4 {
+  font-size: 16px;
+  margin: 0 0 4px;
+}
+
+.rating,
+.noRating {
+  font-size: 14px;
+  color: #666;
+}
+
+.tripInfo {
+  flex: 1;
+}
+
+.tripType {
+  font-size: 2rem;
+  margin: 0;
+  font-weight: 700;
+  color: #00c46a;
+}
+
+.tripHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+.tripHeader h3 {
+  font-size: 2rem;
+  margin: 0;
+  color: #333;
+}
+
+.tripTimes {
+  margin: 0;
+  color: #000000;
+  font-size: 1.3rem;
+}
+
+.locations {
+  margin: 0;
+  color: #000000;
+  font-size: 1.3rem;
+}
+
+.tripFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #eee;
+}
+
+.priceSection {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  text-align: right;
+}
+
+.price {
+  font-size: 24px;
+  font-weight: bold;
+  color: #0084ff;
+  margin-bottom: 4px;
+}
+
+.seatsLeft,
+.seatsRequired {
+  color: #28a745;
+  font-size: 14px;
+}
+
+.tripFull {
+  color: #dc3545;
+  font-size: 14px;
+}
+
+.vehiclePreferences {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.preferenceIcons {
+  display: flex;
+  gap: 8px;
+}
+
+.vehicleInfo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #eee;
+}
+
+.vehicleInfo img {
+  width: 120px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 8px;
+}

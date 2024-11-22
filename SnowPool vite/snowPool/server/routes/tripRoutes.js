@@ -33,7 +33,35 @@ router.post("/passenger", async (req, res) => {
   createTrip(req, res);
 });
 
-// Get user's trips
+// // Get user's trips
+// router.get("/my/driver", async (req, res) => {
+//   try {
+//     const trips = await Trip.find({
+//       user: req.user.id,
+//       tripType: "driver",
+//     })
+//       .populate("user", "name")
+//       .sort({ createdAt: -1 });
+//     res.status(200).json(trips);
+//   } catch (error) {
+//     res.status(500).json({ message: "Error fetching your trips" });
+//   }
+// });
+
+// router.get("/my/passenger", async (req, res) => {
+//   try {
+//     const trips = await Trip.find({
+//       user: req.user.id,
+//       tripType: "passenger",
+//     })
+//       .populate("user", "name")
+//       .sort({ createdAt: -1 });
+//     res.status(200).json(trips);
+//   } catch (error) {
+//     res.status(500).json({ message: "Error fetching your trips" });
+//   }
+// });
+
 router.get("/my/all", getMyTrips);
 
 // Update and Delete

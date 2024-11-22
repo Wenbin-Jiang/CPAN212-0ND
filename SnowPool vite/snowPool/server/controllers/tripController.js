@@ -1,7 +1,6 @@
 const Trip = require("../models/tripsModal");
 
-// Create=
-
+// Create
 const createTrip = async (req, res) => {
   try {
     console.log("Request body:", req.body); // Debug log

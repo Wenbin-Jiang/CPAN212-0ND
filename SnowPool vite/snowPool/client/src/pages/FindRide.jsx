@@ -1,4 +1,3 @@
-// pages/FindRide.jsx
 import { useState } from "react";
 import axios from "axios";
 import Footer from "../components/Footer";
@@ -13,10 +12,12 @@ function FindRide() {
   const [searchResults, setSearchResults] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [searchParams, setSearchParams] = useState(null);
 
-  const handleSearch = async (searchParams) => {
+  const handleSearch = async (params) => {
     setIsLoading(true);
     setError("");
+    setSearchParams(params);
 
     try {
       const token = localStorage.getItem("authToken");
@@ -26,9 +27,9 @@ function FindRide() {
 
       const response = await axios.get(`${baseURL}/api/trips/search`, {
         params: {
-          origin: searchParams.origin?.address || "",
-          destination: searchParams.destination.address,
-          date: searchParams.date,
+          origin: params.origin?.address || "",
+          destination: params.destination.address,
+          date: params.date,
         },
         headers: {
           Authorization: `Bearer ${token}`,
@@ -48,16 +49,19 @@ function FindRide() {
 
   return (
     <>
-      <main
-        className={`${styles.findride} ${
-          searchResults ? styles.withResults : ""
-        }`}
-      >
+      <main className={styles.findride}>
         <PageNav />
-        <div className={styles.row}>
+        <div className={styles.container}>
           <SearchBox onSearch={handleSearch} isLoading={isLoading} />
           {error && <div className={styles.errorMessage}>{error}</div>}
-          {searchResults && <SearchResults rides={searchResults} />}
+          {searchResults && (
+            <SearchResults
+              results={searchResults}
+              searchOrigin={searchParams?.origin?.address}
+              searchDestination={searchParams?.destination?.address}
+              totalResults={searchResults.length}
+            />
+          )}
         </div>
       </main>
       <Footer />

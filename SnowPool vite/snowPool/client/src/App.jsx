@@ -7,6 +7,7 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import ProfilePage from "./pages/profilePage";
 import Checkout from "./pages/Checkout";
+import MyTrips from "./pages/MyTrips";
 
 const user = {
   name: "Wen Bin",
@@ -28,6 +29,7 @@ function App() {
             <Route path="findride" element={<FindRide />} />
             <Route path="postride" element={<PostRide />} />
             <Route path="login" element={<Login />} />
+            <Route path="mytrips" element={<MyTrips />} />
             <Route path="dashboard" element={<Dashboard user={user} />} />
             {/* <Route path="/forgot-password" element={<ForgotPassword />} /> */}
             {/* <Route path="/sign-up" element={<SignUp />} /> */}
