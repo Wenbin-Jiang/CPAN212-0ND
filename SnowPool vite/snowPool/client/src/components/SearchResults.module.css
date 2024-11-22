@@ -1,71 +1,104 @@
 /* SearchResults.module.css */
-.searchResults {
-  max-width: 200px;
+.resultsContainer {
+  padding: 20px;
+  max-width: 800px;
   margin: 0 auto;
-  padding: 2rem;
 }
 
-.dateHeader {
-  font-size: 1.2rem;
-  color: #e1dcdc;
-  margin: 2rem 0 1rem;
-}
-
-.rideCard {
-  background: white;
-  border-radius: 8px;
-  padding: 1.5rem;
-  margin-bottom: 1rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  border-left: 4px solid #ff5722;
-}
-
-.rideHeader {
+.resultsHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid #eee;
+  margin-bottom: 20px;
 }
 
-.rideHeader h4 {
-  margin: 0;
-  font-size: 1.1rem;
-  color: #333;
-}
-
-.seatsNeeded {
-  color: #ff5722;
-  font-weight: 600;
-  font-size: 0.9rem;
+.tripCard {
+  display: flex;
+  gap: 20px;
+  padding: 20px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
 }
 
 .driverInfo {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 1rem;
+  min-width: 120px;
 }
 
-.driverInfo img {
-  width: 40px;
-  height: 40px;
+.driverPhoto {
+  width: 80px;
+  height: 80px;
   border-radius: 50%;
-  object-fit: cover;
+  margin-bottom: 10px;
 }
 
-.driverName {
-  margin: 0;
-  font-weight: 600;
-  color: #181818;
+.driverDetails {
+  text-align: center;
 }
 
-.rideStats {
-  margin: 0;
-  font-size: 0.9rem;
+.rating {
+  color: #666;
+  font-size: 0.9em;
+}
+
+.noRating {
+  color: #666;
+  font-size: 0.9em;
+}
+
+.tripDetails {
+  flex: 1;
+}
+
+.tripInfo {
+  display: flex;
+  gap: 40px;
+  margin: 15px 0;
+}
+
+.locationDetails {
+  margin: 15px 0;
+}
+
+.tripFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.preferences {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.preferenceIcons {
+  display: flex;
+  gap: 5px;
+}
+
+.pricing {
+  text-align: right;
+}
+
+.price {
+  font-size: 1.5em;
+  font-weight: bold;
+  color: #0066cc;
+  display: block;
+}
+
+.seats {
   color: #666;
 }
 
-.rideStats span {
-  margin-right: 0.5rem;
+.noResults {
+  text-align: center;
+  padding: 40px;
+  color: #666;
 }

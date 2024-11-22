@@ -1,14 +1,13 @@
 // components/SearchBox.jsx
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { useGooglePlacesWithGeo } from "../hooks/useGooglePlacesWithGeo";
 import styles from "./SearchBox.module.css";
 
-function SearchBox() {
+function SearchBox({ onSearch, isLoading }) {
   const [from, setFrom] = useState({ address: "", lat: null, lng: null });
   const [to, setTo] = useState({ address: "", lat: null, lng: null });
   const [date, setDate] = useState("");
-  const navigate = useNavigate();
+  const [error, setError] = useState("");
 
   const { initializeAutocomplete } = useGooglePlacesWithGeo();
 
@@ -17,28 +16,53 @@ function SearchBox() {
     initializeAutocomplete("destination-input", setTo);
   }, [initializeAutocomplete]);
 
-  const handleSearch = () => {
-    if (!from.address || !to.address || !date) {
-      alert("Please fill in all fields");
+  const validateSearch = () => {
+    setError("");
+
+    if (!to.address || !to.lat || !to.lng) {
+      setError("Please select a destination");
+      return false;
+    }
+
+    if (!date) {
+      setError("Please select a date");
+      return false;
+    }
+
+    const selectedDate = new Date(date);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    if (selectedDate < today) {
+      setError("Please select a future date");
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+
+    if (!validateSearch()) {
       return;
     }
 
     const searchParams = {
-      from: {
-        address: from.address,
-        coordinates: { lat: from.lat, lng: from.lng },
-      },
-      to: {
+      ...(from.address && {
+        origin: {
+          address: from.address,
+          coordinates: { lat: from.lat, lng: from.lng },
+        },
+      }),
+      destination: {
         address: to.address,
         coordinates: { lat: to.lat, lng: to.lng },
       },
       date,
     };
 
-    console.log("Search params:", searchParams);
-
-    // You can use these parameters to navigate to search results
-    navigate("/search-results", { state: searchParams });
+    onSearch(searchParams);
   };
 
   return (
@@ -50,7 +74,7 @@ function SearchBox() {
           <input
             id="origin-input"
             type="text"
-            placeholder="Origin"
+            placeholder="Origin (Optional)"
             value={from.address}
             onChange={(e) => setFrom({ ...from, address: e.target.value })}
           />
@@ -61,9 +85,10 @@ function SearchBox() {
           <input
             id="destination-input"
             type="text"
-            placeholder="Destination"
+            placeholder="Destination *"
             value={to.address}
             onChange={(e) => setTo({ ...to, address: e.target.value })}
+            required
           />
         </div>
 
@@ -73,15 +98,23 @@ function SearchBox() {
             type="date"
             value={date}
             onChange={(e) => setDate(e.target.value)}
-            min={new Date().toISOString().split("T")[0]} // Set minimum date to today
+            min={new Date().toISOString().split("T")[0]}
+            required
+            placeholder="Date *"
           />
         </div>
 
-        <button onClick={handleSearch}>
+        <button
+          onClick={handleSearch}
+          disabled={isLoading}
+          className={styles.searchButton}
+        >
           <i className="fas fa-search"></i>
-          Search
+          {isLoading ? "Searching..." : "Search"}
         </button>
       </div>
+
+      {error && <div className={styles.errorMessage}>{error}</div>}
     </section>
   );
 }
