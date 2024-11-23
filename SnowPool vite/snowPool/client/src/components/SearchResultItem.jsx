@@ -94,23 +94,13 @@ function SearchResultItem({ trip }) {
 
         <div className={styles.tripFooter}>
           <div className={styles.preferences}>
-            <strong>Vehicle preferences</strong>
-            <div className={styles.preferenceIcons}>
-              {trip.preferences?.map((pref, i) => (
-                <span key={i} className={styles.icon}>
-                  {pref}
-                </span>
-              ))}
-            </div>
+            {trip.additionalMessage && (
+              <p className={styles.additionalMessage}>
+                Note: {trip.additionalMessage}
+              </p>
+            )}
           </div>
         </div>
-
-        {isDriver && trip.vehicle && (
-          <div className={styles.vehicleInfo}>
-            <img src={trip.vehicle.photo} alt="" />
-            <span>{trip.vehicle.model}</span>
-          </div>
-        )}
       </div>
     </div>
   );

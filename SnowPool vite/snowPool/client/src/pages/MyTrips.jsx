@@ -8,8 +8,11 @@ import styles from "./MyTrips.module.css";
 
 const baseURL = "http://localhost:8001";
 
+const getFirstPart = (address) => {
+  return address?.split(",")[0] || "";
+};
+
 function MyTrips() {
-  const { userData } = useUserContext();
   const [activeTab, setActiveTab] = useState("driver");
   const [allTrips, setAllTrips] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -57,6 +60,8 @@ function MyTrips() {
     return date.toLocaleDateString();
   };
 
+  const isDriver = activeTab === "driver";
+
   return (
     <>
       <main className={styles.trips}>
@@ -88,11 +93,11 @@ function MyTrips() {
           ) : filteredTrips.length === 0 ? (
             <div className={styles.empty}>
               <p>
-                You have no{" "}
-                {activeTab === "driver" ? "drives" : "ride requests"}.
+                You have no upcoming{" "}
+                {activeTab === "driver" ? "drives" : "requests"}.
               </p>
               <button
-                onClick={() => navigate("/post-trip")}
+                onClick={() => navigate("/postride")}
                 className={styles.postButton}
               >
                 Post a trip
@@ -104,13 +109,35 @@ function MyTrips() {
                 <div key={trip._id} className={styles.tripCard}>
                   <div className={styles.tripHeader}>
                     <h3>
-                      {trip.origin} to {trip.destination}
+                      {getFirstPart(trip.origin)} to{" "}
+                      {getFirstPart(trip.destination)}
                     </h3>
+                  </div>
+                  <div className={styles.priceSection}>
+                    <span className={styles.price}>
+                      ${isDriver ? trip.pricePerSeat : trip.willingToPay}
+                    </span>
+                    {isDriver ? (
+                      <span className={styles.seatsLeft}>
+                        {trip.seatsAvailable}{" "}
+                        {trip.seatsAvailable === 1 ? "seat" : "seats"} left
+                      </span>
+                    ) : (
+                      <span className={styles.seatsRequired}>
+                        {trip.seatsRequired}{" "}
+                        {trip.seatsRequired === 1 ? "seat" : "seats"} needed
+                      </span>
+                    )}
                   </div>
                   <div className={styles.tripDetails}>
                     <p>
                       Leaving: {formatDate(trip.date)} at {trip.time}
                     </p>
+                    {trip.additionalMessage && (
+                      <p className={styles.additionalMessage}>
+                        Note: {trip.additionalMessage}
+                      </p>
+                    )}
                   </div>
                   <div className={styles.tripActions}>
                     <button

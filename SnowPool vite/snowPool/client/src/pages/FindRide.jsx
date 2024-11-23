@@ -20,19 +20,11 @@ function FindRide() {
     setSearchParams(params);
 
     try {
-      const token = localStorage.getItem("authToken");
-      if (!token) {
-        throw new Error("Authentication required");
-      }
-
       const response = await axios.get(`${baseURL}/api/trips/search`, {
         params: {
           origin: params.origin?.address || "",
           destination: params.destination.address,
           date: params.date,
-        },
-        headers: {
-          Authorization: `Bearer ${token}`,
         },
       });
 

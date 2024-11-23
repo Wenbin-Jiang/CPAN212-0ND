@@ -101,6 +101,13 @@
   font-size: 14px;
 }
 
+.additionalMessage {
+  margin-top: 8px;
+  font-style: italic;
+  color: #0f0f0f;
+  font-size: 1.5rem;
+}
+
 .vehiclePreferences {
   display: flex;
   align-items: center;

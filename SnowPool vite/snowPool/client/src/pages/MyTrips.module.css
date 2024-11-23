@@ -48,6 +48,43 @@
   align-items: center;
   margin-bottom: 16px;
   color: #131314;
+  font-size: 1.5rem;
+}
+
+.tripDetails {
+  font-size: 1.5rem;
+  color: #131314;
+}
+
+.priceSection {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin: 12px 0;
+}
+
+.price {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #0084ff;
+  margin-bottom: 8px;
+}
+
+.seatsLeft,
+.seatsRequired {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 1.5rem;
+}
+
+.seatsLeft {
+  background-color: rgba(0, 132, 255, 0.1);
+  color: #0084ff;
+}
+
+.seatsRequired {
+  background-color: rgba(220, 53, 69, 0.1);
+  color: #dc3545;
 }
 
 .actions {
@@ -77,7 +114,8 @@
 .empty {
   text-align: center;
   padding: 40px;
-  color: #666;
+  color: #f0ecec;
+  font-size: 5rem;
 }
 
 .postLink {
@@ -96,4 +134,26 @@
 
 .deleteButton:hover {
   background-color: #d32f2f;
+}
+
+.postButton {
+  padding: 10px 20px;
+  background: #0084ff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: 12px;
+  width: fit-content;
+}
+
+.postButton:hover {
+  background: #0066cc;
+}
+
+.additionalMessage {
+  margin-top: 8px;
+  font-style: italic;
+  color: #0f0f0f;
+  font-size: 1.5rem;
 }
