@@ -10,6 +10,8 @@ const {
   searchTrips,
   createJoinRequest,
   handleJoinRequest,
+  createDriverRequest,
+  handleDriverRequest,
 } = require("../controllers/tripController");
 const protectAndAuthorize = require("../middleware/authMiddleware");
 
@@ -69,7 +71,11 @@ router.get("/my/all", getMyTrips);
 // Update and Delete
 router.route("/:id").put(updateTrip).delete(deleteTrip);
 
+//join a driver posted carpool
 router.post("/:tripId/join", createJoinRequest);
 router.put("/:tripId/requests/:requestId/respond", handleJoinRequest);
 
+// Become a driver for a passenger-posted carpool (Driver Request)
+router.post("/:tripId/request-driver", createDriverRequest);
+router.put("/:tripId/driver-requests/:requestId/respond", handleDriverRequest);
 module.exports = router;

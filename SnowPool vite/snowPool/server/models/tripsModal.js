@@ -58,21 +58,6 @@ const tripSchema = new mongoose.Schema({
     },
   },
 
-  // Passenger-specific fields
-  seatsRequired: {
-    type: Number,
-    min: 1,
-    required: function () {
-      return this.tripType === "passenger";
-    },
-  },
-  willingToPay: {
-    type: Number,
-    required: function () {
-      return this.tripType === "passenger";
-    },
-  },
-
   // Join requests for the trip
   joinRequests: [
     {
@@ -96,6 +81,50 @@ const tripSchema = new mongoose.Schema({
       joinedAt: { type: Date, default: Date.now },
     },
   ],
+
+  // Passenger-specific fields
+  seatsRequired: {
+    type: Number,
+    min: 1,
+    required: function () {
+      return this.tripType === "passenger";
+    },
+  },
+  willingToPay: {
+    type: Number,
+    required: function () {
+      return this.tripType === "passenger";
+    },
+  },
+
+  //join request to become driver
+  driverRequests: [
+    {
+      driver: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+      status: {
+        type: String,
+        enum: ["Pending", "Accepted", "Declined"],
+        default: "Pending",
+      },
+      createdAt: { type: Date, default: Date.now },
+      respondedAt: { type: Date },
+    },
+  ],
+
+  //accepted driver for request
+  driver: [
+    {
+      user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+      joinedAt: { type: Date, default: Date.now },
+    },
+  ],
+
+  //trip status filled,
+  requestStatus: {
+    type: String,
+    enum: ["Open", "Request Filled"],
+    default: "Open",
+  },
 });
 
 // Indexes for better query performance

@@ -14,11 +14,18 @@ const userSchema = new mongoose.Schema({
   carModel: { type: String },
   licensePlate: { type: String },
   bio: { type: String, maxlength: 500 },
+
   notifications: [
     {
       type: {
         type: String,
-        enum: ["joinRequest", "acceptedRequest"],
+        enum: [
+          "joinRequest",
+          "acceptedRequest",
+          "driverRequest",
+          "acceptedDriverRequest",
+          "declinedDriverRequest",
+        ],
       },
       trip: { type: mongoose.Schema.Types.ObjectId, ref: "Trip" },
       message: { type: String },
