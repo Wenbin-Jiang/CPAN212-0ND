@@ -38,17 +38,15 @@ const tripSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
-
   time: {
     type: String,
     required: true,
   },
 
   // Driver-specific fields
-
   seatsAvailable: {
     type: Number,
-    min: 1,
+    min: 0,
     required: function () {
       return this.tripType === "driver";
     },
@@ -74,6 +72,30 @@ const tripSchema = new mongoose.Schema({
       return this.tripType === "passenger";
     },
   },
+
+  // Join requests for the trip
+  joinRequests: [
+    {
+      passenger: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+      requestedSeats: { type: Number, min: 1 },
+      status: {
+        type: String,
+        enum: ["Pending", "Accepted", "Declined"],
+        default: "Pending",
+      },
+      createdAt: { type: Date, default: Date.now },
+      respondedAt: { type: Date },
+    },
+  ],
+
+  // Passengers accepted for the trip
+  passengers: [
+    {
+      user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+      seatsBooked: { type: Number },
+      joinedAt: { type: Date, default: Date.now },
+    },
+  ],
 });
 
 // Indexes for better query performance
@@ -82,12 +104,7 @@ tripSchema.index({ origin: 1, destination: 1 });
 tripSchema.index({ date: 1 });
 tripSchema.index({ user: 1 });
 
-// Virtual field to determine if the trip is a driver trip or passenger request
-tripSchema.virtual("isDriverTrip").get(function () {
-  return this.tripType === "driver";
-});
-
-// Pre-save middleware to validate required fields based on trip type
+// Middleware to validate driver-specific fields
 tripSchema.pre("save", function (next) {
   if (
     this.tripType === "driver" &&

@@ -8,6 +8,8 @@ const {
   updateTrip,
   deleteTrip,
   searchTrips,
+  createJoinRequest,
+  handleJoinRequest,
 } = require("../controllers/tripController");
 const protectAndAuthorize = require("../middleware/authMiddleware");
 
@@ -66,5 +68,8 @@ router.get("/my/all", getMyTrips);
 
 // Update and Delete
 router.route("/:id").put(updateTrip).delete(deleteTrip);
+
+router.post("/:tripId/join", createJoinRequest);
+router.put("/:tripId/requests/:requestId/respond", handleJoinRequest);
 
 module.exports = router;
