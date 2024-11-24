@@ -4,9 +4,23 @@ function SearchResultItem({ trip }) {
   const isTripFull = trip.seatsAvailable === 0;
   const isDriver = trip.tripType === "driver";
 
-  //extract first part of address
   const getFirstPart = (address) => {
     return address?.split(",")[0] || "";
+  };
+
+  const calculateAge = (birthday) => {
+    if (!birthday) return null;
+    const birthDate = new Date(birthday);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    if (
+      monthDiff < 0 ||
+      (monthDiff === 0 && today.getDate() < birthDate.getDate())
+    ) {
+      age--;
+    }
+    return age;
   };
 
   return (
@@ -19,6 +33,12 @@ function SearchResultItem({ trip }) {
         />
         <div className={styles.driverInfo}>
           <h4>{trip.user?.name}</h4>
+          <div className={styles.userDetails}>
+            <span>{trip.user?.gender}</span>
+            {trip.user?.birthday && (
+              <span> • {calculateAge(trip.user.birthday)} years old</span>
+            )}
+          </div>
           {trip.user?.rating ? (
             <div className={styles.rating}>
               <span>★ {trip.user.rating}</span>
@@ -29,9 +49,25 @@ function SearchResultItem({ trip }) {
           ) : (
             <span className={styles.noRating}>No ratings, yet</span>
           )}
+          {isDriver && (
+            <div className={styles.carInfo}>
+              <div>
+                <strong>Car:</strong> {trip.user?.carModel}
+              </div>
+              <div>
+                <strong>License:</strong> {trip.user?.licensePlate}
+              </div>
+              {trip.user?.driverHistory && (
+                <div>
+                  <strong>Experience:</strong> {trip.user.driverHistory}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
+      {/* Rest of the component remains the same */}
       <div className={styles.tripInfo}>
         <div className={styles.tripHeader}>
           <div>

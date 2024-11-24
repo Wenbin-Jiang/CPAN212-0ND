@@ -44,7 +44,6 @@ export default function Login() {
       }
     } catch (err) {
       setError("Invalid credentials. Please try again.");
-      console.error(err);
     }
   };
 

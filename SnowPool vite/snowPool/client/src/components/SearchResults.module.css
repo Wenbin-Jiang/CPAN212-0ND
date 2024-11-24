@@ -22,6 +22,9 @@
   margin: 20px auto;
   max-width: 600px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  color: #666;
+  font-weight: 700;
+  font-size: 2rem;
 }
 
 .noResultsContent h3 {
@@ -29,17 +32,6 @@
   margin-bottom: 16px;
 }
 
-.noResultsContent p {
-  color: #666;
-  margin-bottom: 16px;
-}
-
 .noResultsContent ul {
   list-style: none;
-  padding: 0;
-  color: #666;
-}
-
-.noResultsContent li {
-  margin: 8px 0;
 }

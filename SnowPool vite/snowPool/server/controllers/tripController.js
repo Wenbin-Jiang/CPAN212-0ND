@@ -28,7 +28,10 @@ const createTrip = async (req, res) => {
 const getAllTrips = async (req, res) => {
   try {
     const trips = await Trip.find()
-      .populate("user", "name")
+      .populate(
+        "user",
+        "name email gender birthday carModel driverHistory licensePlate createdAt"
+      )
       .sort({ createdAt: -1 });
     res.status(200).json(trips);
   } catch (error) {
@@ -141,7 +144,11 @@ const searchTrips = async (req, res) => {
     }
 
     const trips = await Trip.find(query)
-      .populate("user", "name")
+      .populate({
+        path: "user",
+        select:
+          "name email gender birthday carModel driverHistory licensePlate createdAt",
+      })
       .sort({ createdAt: -1 });
 
     res.status(200).json(trips);
