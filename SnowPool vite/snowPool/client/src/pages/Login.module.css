@@ -1,3 +1,4 @@
+/* Main Container */
 .login {
   margin: 2.5rem;
   padding: 2.5rem 5rem;
@@ -11,19 +12,18 @@
   background-position: center;
 }
 
+/* Form Styles */
 .form {
-  background-color: rgba(221, 219, 219, 0.431);
-  border-radius: 7px;
+  width: 48rem;
+  margin: 8rem auto;
   padding: 2rem 3rem;
-  width: 100%;
   display: flex;
   flex-direction: column;
   gap: 2rem;
+  background-color: rgba(221, 219, 219, 0.431);
+  border-radius: 7px;
   opacity: 0.9;
   color: black;
-
-  width: 48rem;
-  margin: 8rem auto;
 }
 
 .row {
@@ -32,18 +32,21 @@
   gap: 0.5rem;
 }
 
+/* Button Styles */
 button {
   background-color: #00c46a;
-  text-transform: uppercase;
+  color: inherit;
   padding: 0.8rem 1.6rem;
-  font-family: inherit;
-  font-weight: 700;
-  font-size: 1.5rem;
   border: none;
   border-radius: 5px;
+  font-family: inherit;
+  font-size: 1.5rem;
+  font-weight: 700;
+  text-transform: uppercase;
   cursor: pointer;
 }
 
+/* Navigation Links */
 .buttons {
   display: flex;
   flex-direction: column;
@@ -52,10 +55,10 @@ button {
 
 .buttons h5,
 .buttons h3 {
-  color: #161717;
-  cursor: pointer;
-  text-align: center;
   margin-top: 1rem;
+  color: #161717;
+  text-align: center;
+  cursor: pointer;
 }
 
 .buttons h5:hover,
@@ -63,6 +66,7 @@ button {
   text-decoration: underline;
 }
 
+/* Error Message */
 .error {
   font-size: 2rem;
   text-align: center;

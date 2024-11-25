@@ -83,7 +83,7 @@ const createJoinRequest = async (req, res) => {
 
     // Check if the user has already sent a request for this trip
     const existingRequest = trip.joinRequests.find(
-      (request) => request.passenger.toString() === passengerId
+      (request) => request.passenger?.toString() === passengerId
     );
 
     if (existingRequest) {
@@ -97,15 +97,11 @@ const createJoinRequest = async (req, res) => {
       return res.status(400).send("Not enough seats available");
     }
 
-    // Add the join request
     trip.joinRequests.push({
       passenger: passengerId,
       requestedSeats,
       status: "Pending",
     });
-
-    // Update the available seats on the trip
-    trip.seatsAvailable -= requestedSeats;
 
     // Save the updated trip
     await trip.save();
@@ -118,7 +114,6 @@ const createJoinRequest = async (req, res) => {
       message: `${passengerName} has requested ${requestedSeats} seat(s) for the trip.`,
     });
 
-    // Save the updated driver notifications
     await driver.save();
 
     res.status(200).send("Join request sent");
@@ -129,93 +124,6 @@ const createJoinRequest = async (req, res) => {
       .send("An error occurred while processing the join request.");
   }
 };
-
-// const handleJoinRequest = async (req, res) => {
-//   try {
-//     const { tripId, requestId } = req.params;
-//     const { action } = req.body; // "Accept" or "Decline"
-
-//     // Validate action
-//     if (!["Accept", "Decline"].includes(action)) {
-//       return res
-//         .status(400)
-//         .send("Invalid action. Must be 'Accept' or 'Decline'.");
-//     }
-
-//     // Find the trip by ID and populate joinRequests with passengers
-//     const trip = await Trip.findById(tripId).populate("joinRequests.passenger");
-
-//     if (!trip) {
-//       return res.status(404).send("Trip not found.");
-//     }
-
-//     // Check if the authenticated user is the driver (trip creator)
-//     if (req.user.id !== trip.user._id.toString()) {
-//       return res
-//         .status(403)
-//         .send("You are not authorized to manage this request.");
-//     }
-
-//     // Find the specific join request
-//     const request = trip.joinRequests.id(requestId);
-//     if (!request) {
-//       return res.status(404).send("Join request not found.");
-//     }
-
-//     // Check if the request is already handled
-//     if (request.status !== "Pending") {
-//       return res
-//         .status(400)
-//         .send("This join request has already been handled.");
-//     }
-
-//     // Handle the request based on action
-//     if (action === "Accept") {
-//       // Ensure seats are available
-//       if (trip.seatsAvailable < request.requestedSeats) {
-//         return res.status(400).send("Not enough seats available.");
-//       }
-
-//       // Accept the request: Update trip and request status
-//       trip.passengers.push({
-//         user: request.passenger._id,
-//         seatsBooked: request.requestedSeats,
-//       });
-//       trip.seatsAvailable -= request.requestedSeats;
-//       request.status = "Accepted";
-//     } else if (action === "Decline") {
-//       // Decline the request: Update request status
-//       request.status = "Declined";
-//     }
-
-//     request.respondedAt = new Date(); // Record response time
-//     await trip.save();
-
-//     // Notify the passenger
-//     const passenger = await User.findById(request.passenger._id);
-//     if (passenger) {
-//       passenger.notifications.push({
-//         type: action === "Accept" ? "acceptedRequest" : "declinedRequest",
-//         trip: trip._id,
-//         message:
-//           action === "Accept"
-//             ? `Your request to join the trip from ${trip.origin} to ${trip.destination} has been accepted.`
-//             : `Your request to join the trip from ${trip.origin} to ${trip.destination} has been declined.`,
-//         createdAt: new Date(),
-//       });
-//       await passenger.save();
-//     }
-
-//     res.status(200).send(`Request ${action.toLowerCase()}ed successfully.`);
-//   } catch (error) {
-//     console.error(error);
-//     res
-//       .status(500)
-//       .send("An error occurred while processing the join request.");
-//   }
-// };
-
-// Create
 
 const handleJoinRequest = async (req, res) => {
   try {
@@ -324,7 +232,7 @@ const createDriverRequest = async (req, res) => {
 
     // Check if the user has already sent a request for this trip
     const existingRequest = trip.driverRequests.find(
-      (request) => request.driver.toString() === driverId
+      (request) => request.driver?.toString() === driverId
     );
 
     if (existingRequest) {

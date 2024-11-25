@@ -12,6 +12,7 @@ const {
   handleJoinRequest,
   createDriverRequest,
   handleDriverRequest,
+  checkExistingRequest,
 } = require("../controllers/tripController");
 const protectAndAuthorize = require("../middleware/authMiddleware");
 
@@ -78,4 +79,5 @@ router.put("/:tripId/requests/:requestId/respond", handleJoinRequest);
 // Become a driver for a passenger-posted carpool (Driver Request)
 router.post("/:tripId/request-driver", createDriverRequest);
 router.put("/:tripId/driver-requests/:requestId/respond", handleDriverRequest);
+
 module.exports = router;

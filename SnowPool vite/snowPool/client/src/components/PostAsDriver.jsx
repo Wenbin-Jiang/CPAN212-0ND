@@ -1,21 +1,13 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios"; // Add this import
+import api from "../services/api";
 import styles from "./PostAsDriver.module.css";
 import { useGooglePlacesWithGeo } from "../hooks/useGooglePlacesWithGeo";
 
-const baseURL = "http://localhost:8001";
+const initialLocation = { address: "", lat: null, lng: null };
 
 export default function PostAsDriver() {
-  const [departure, setDeparture] = useState({
-    address: "",
-    lat: null,
-    lng: null,
-  });
-  const [destination, setDestination] = useState({
-    address: "",
-    lat: null,
-    lng: null,
-  });
+  const [departure, setDeparture] = useState(initialLocation);
+  const [destination, setDestination] = useState(initialLocation);
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [seatsAvailable, setSeatsAvailable] = useState(1);
@@ -38,23 +30,17 @@ export default function PostAsDriver() {
     if (!destination.address || !destination.lat || !destination.lng) {
       throw new Error("Please select a valid destination");
     }
-    if (!date) {
-      throw new Error("Please select a date");
-    }
-    if (!time) {
-      throw new Error("Please select a time");
-    }
+    if (!date) throw new Error("Please select a date");
+    if (!time) throw new Error("Please select a time");
     if (!seatsAvailable || seatsAvailable < 1) {
       throw new Error("Please enter valid number of seats");
     }
-    if (!cost || cost < 0) {
-      throw new Error("Please enter a valid price");
-    }
+    if (!cost || cost < 0) throw new Error("Please enter a valid price");
   };
 
   const resetForm = () => {
-    setDeparture({ address: "", lat: null, lng: null });
-    setDestination({ address: "", lat: null, lng: null });
+    setDeparture(initialLocation);
+    setDestination(initialLocation);
     setDate("");
     setTime("");
     setSeatsAvailable(1);
@@ -71,11 +57,6 @@ export default function PostAsDriver() {
     try {
       validateForm();
 
-      const token = localStorage.getItem("authToken");
-      if (!token) {
-        throw new Error("Authentication required");
-      }
-
       const tripData = {
         origin: departure.address,
         originLatLng: [departure.lat, departure.lng],
@@ -88,35 +69,19 @@ export default function PostAsDriver() {
         additionalMessage: message,
       };
 
-      const config = {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      };
-
-      const response = await axios.post(
-        `${baseURL}/api/trips/driver`,
-        tripData,
-        config
-      );
+      const response = await api.post("/api/trips/driver", tripData);
 
       if (response.data) {
         alert("Trip created successfully!");
         resetForm();
       }
     } catch (error) {
-      if (error.response) {
-        // Server responded with error
-        setError(error.response.data.message || "Server error occurred");
-      } else if (error.request) {
-        // Request made but no response
-        setError("No response from server");
-      } else {
-        // Other errors
-        setError(error.message || "Failed to create trip");
-      }
-      console.error("Error details:", error);
+      setError(
+        error.response?.data?.message ||
+          error.message ||
+          "Failed to create trip"
+      );
+      console.error("Error creating trip:", error);
     } finally {
       setIsLoading(false);
     }

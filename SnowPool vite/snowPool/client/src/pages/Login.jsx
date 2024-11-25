@@ -42,7 +42,7 @@ export default function Login() {
       } else {
         navigate("/userprofile");
       }
-    } catch (err) {
+    } catch (error) {
       setError("Invalid credentials. Please try again.");
     }
   };

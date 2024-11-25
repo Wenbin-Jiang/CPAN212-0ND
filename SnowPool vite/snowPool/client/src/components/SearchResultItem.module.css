@@ -1,3 +1,4 @@
+/* Card Layout */
 .tripCard {
   display: flex;
   gap: 24px;
@@ -8,6 +9,7 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
+/* Driver Section */
 .driverSection {
   width: 100px;
   text-align: center;
@@ -25,120 +27,16 @@
   margin: 0 0 4px;
 }
 
-.rating,
-.noRating {
-  font-size: 14px;
-  color: #666;
-}
-
-.tripInfo {
-  flex: 1;
-}
-
-.tripType {
-  font-size: 2rem;
-  margin: 0;
-  font-weight: 700;
-  color: #00c46a;
-}
-
-.tripHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 20px;
-}
-
-.tripHeader h3 {
-  font-size: 2rem;
-  margin: 0;
-  color: #333;
-}
-
-.tripTimes {
-  margin: 0;
-  color: #000000;
-  font-size: 1.3rem;
-}
-
-.locations {
-  margin: 0;
-  color: #000000;
-  font-size: 1.3rem;
-}
-
-.tripFooter {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 20px;
-  padding-top: 20px;
-  border-top: 1px solid #eee;
-}
-
-.priceSection {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  text-align: right;
-}
-
-.price {
-  font-size: 24px;
-  font-weight: bold;
-  color: #0084ff;
-  margin-bottom: 4px;
-}
-
-.seatsLeft,
-.seatsRequired {
-  color: #28a745;
-  font-size: 14px;
-}
-
-.tripFull {
-  color: #dc3545;
-  font-size: 14px;
-}
-
-.additionalMessage {
-  margin-top: 8px;
-  font-style: italic;
-  color: #0f0f0f;
-  font-size: 1.5rem;
-}
-
-.vehiclePreferences {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.preferenceIcons {
-  display: flex;
-  gap: 8px;
-}
-
-.vehicleInfo {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-top: 16px;
-  padding-top: 16px;
-  border-top: 1px solid #eee;
-}
-
-.vehicleInfo img {
-  width: 120px;
-  height: 80px;
-  object-fit: cover;
-  border-radius: 8px;
-}
-
 .userDetails {
   font-size: 0.9em;
   color: #666;
   margin: 2px 0;
+}
+
+.rating,
+.noRating {
+  font-size: 14px;
+  color: #666;
 }
 
 .carInfo {
@@ -155,4 +53,112 @@
 .carInfo strong {
   color: #666;
   margin-right: 4px;
+}
+
+/* Trip Info Section */
+.tripInfo {
+  flex: 1;
+}
+
+.tripHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+.tripType {
+  font-size: 2rem;
+  margin: 0;
+  font-weight: 700;
+  color: #00c46a;
+}
+
+.tripHeader h3 {
+  font-size: 2rem;
+  margin: 0;
+  color: #333;
+}
+
+.tripTimes,
+.locations {
+  margin: 0;
+  color: #000;
+  font-size: 1.3rem;
+}
+
+/* Price Section */
+.priceSection {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  text-align: right;
+}
+
+.price {
+  font-size: 24px;
+  font-weight: bold;
+  color: #0084ff;
+  margin-bottom: 4px;
+}
+
+.seatsLeft,
+.seatsRequired {
+  color: #0084ff;
+  font-size: 14px;
+}
+
+.tripFull {
+  color: #dc3545;
+  font-size: 14px;
+}
+
+/* Footer Section */
+.tripFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #eee;
+}
+
+.additionalMessage {
+  margin-top: 8px;
+  font-style: italic;
+  color: #0f0f0f;
+  font-size: 1.5rem;
+}
+
+/* Button and Error Styles */
+
+.requestButtonContainer {
+  display: flex;
+  flex-direction: column;
+}
+.requestButton {
+  margin-left: auto;
+  background-color: #00c46a;
+  color: #fff;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.3s ease;
+}
+
+.requestButton:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.requestButton:hover:not(:disabled) {
+  background-color: #0acd72;
+}
+
+.error {
+  color: #dc3545;
+  font-size: 1.2rem;
+  font-weight: 700;
 }

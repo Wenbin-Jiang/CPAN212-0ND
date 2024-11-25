@@ -1,21 +1,13 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import api from "../services/api";
 import styles from "./PostCarpoolRequest.module.css";
 import { useGooglePlacesWithGeo } from "../hooks/useGooglePlacesWithGeo";
 
-const baseURL = "http://localhost:8001";
+const initialLocation = { address: "", lat: null, lng: null };
 
 export default function PostCarpoolRequest() {
-  const [pickupLocation, setPickupLocation] = useState({
-    address: "",
-    lat: null,
-    lng: null,
-  });
-  const [dropoffLocation, setDropoffLocation] = useState({
-    address: "",
-    lat: null,
-    lng: null,
-  });
+  const [pickupLocation, setPickupLocation] = useState(initialLocation);
+  const [dropoffLocation, setDropoffLocation] = useState(initialLocation);
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [seatRequired, setSeatRequired] = useState(1);
@@ -25,6 +17,11 @@ export default function PostCarpoolRequest() {
   const [isLoading, setIsLoading] = useState(false);
 
   const { initializeAutocomplete } = useGooglePlacesWithGeo();
+
+  useEffect(() => {
+    initializeAutocomplete("request-pickup", setPickupLocation);
+    initializeAutocomplete("request-dropoff", setDropoffLocation);
+  }, [initializeAutocomplete]);
 
   const validateForm = () => {
     if (!pickupLocation.address || !pickupLocation.lat || !pickupLocation.lng) {
@@ -37,12 +34,8 @@ export default function PostCarpoolRequest() {
     ) {
       throw new Error("Please select a valid dropoff location");
     }
-    if (!date) {
-      throw new Error("Please select a date");
-    }
-    if (!time) {
-      throw new Error("Please select a time");
-    }
+    if (!date) throw new Error("Please select a date");
+    if (!time) throw new Error("Please select a time");
     if (!seatRequired || seatRequired < 1) {
       throw new Error("Please enter valid number of seats");
     }
@@ -52,8 +45,8 @@ export default function PostCarpoolRequest() {
   };
 
   const resetForm = () => {
-    setPickupLocation({ address: "", lat: null, lng: null });
-    setDropoffLocation({ address: "", lat: null, lng: null });
+    setPickupLocation(initialLocation);
+    setDropoffLocation(initialLocation);
     setDate("");
     setTime("");
     setSeatRequired(1);
@@ -70,11 +63,6 @@ export default function PostCarpoolRequest() {
     try {
       validateForm();
 
-      const token = localStorage.getItem("authToken");
-      if (!token) {
-        throw new Error("Authentication required");
-      }
-
       const requestData = {
         origin: pickupLocation.address,
         originLatLng: [pickupLocation.lat, pickupLocation.lng],
@@ -87,41 +75,23 @@ export default function PostCarpoolRequest() {
         additionalMessage: message,
       };
 
-      const config = {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      };
-
-      const response = await axios.post(
-        `${baseURL}/api/trips/passenger`,
-        requestData,
-        config
-      );
+      const response = await api.post("/api/trips/passenger", requestData);
 
       if (response.data) {
         alert("Carpool request created successfully!");
         resetForm();
       }
     } catch (error) {
-      if (error.response) {
-        setError(error.response.data.message || "Server error occurred");
-      } else if (error.request) {
-        setError("No response from server");
-      } else {
-        setError(error.message || "Failed to create request");
-      }
-      console.error("Error details:", error);
+      setError(
+        error.response?.data?.message ||
+          error.message ||
+          "Failed to create request"
+      );
+      console.error("Error creating request:", error);
     } finally {
       setIsLoading(false);
     }
   };
-
-  useEffect(() => {
-    initializeAutocomplete("request-pickup", setPickupLocation);
-    initializeAutocomplete("request-dropoff", setDropoffLocation);
-  }, [initializeAutocomplete]);
 
   return (
     <form onSubmit={handleSubmit} className={styles.formContainer}>

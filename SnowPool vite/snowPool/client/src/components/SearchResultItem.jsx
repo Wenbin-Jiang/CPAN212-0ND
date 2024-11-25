@@ -1,73 +1,145 @@
 import styles from "./SearchResultItem.module.css";
+import { useNavigate } from "react-router-dom";
+import { useUserContext } from "../contexts/UserContext";
+import { useState } from "react";
+import api from "../services/api";
+
+const getFirstPart = (address) => address?.split(",")[0] || "";
+
+const calculateAge = (birthday) => {
+  if (!birthday) return null;
+  const birthDate = new Date(birthday);
+  const today = new Date();
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const monthDiff = today.getMonth() - birthDate.getMonth();
+  if (
+    monthDiff < 0 ||
+    (monthDiff === 0 && today.getDate() < birthDate.getDate())
+  ) {
+    age--;
+  }
+  return age;
+};
+
+const formatDate = (dateString, time) => {
+  const [year, month, day] = dateString.split("-");
+  const dateObj = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+  return `${dateObj.toLocaleDateString("en-US", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+  })} at ${time}`;
+};
 
 function SearchResultItem({ trip }) {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  const navigate = useNavigate();
+  const { userData } = useUserContext();
   const isTripFull = trip.seatsAvailable === 0;
   const isDriver = trip.tripType === "driver";
 
-  const getFirstPart = (address) => {
-    return address?.split(",")[0] || "";
+  const handleRequest = async () => {
+    if (!userData) {
+      alert("Please log in before you put in your request");
+      navigate("/login", {
+        state: {
+          from: window.location.pathname,
+          message: "Please log in before you put in your request",
+        },
+      });
+      return;
+    }
+
+    if (userData.id === trip.user._id) {
+      alert("You cannot request your own trip");
+      return;
+    }
+
+    if (isDriver && isTripFull) {
+      alert("This trip is already full");
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const endpoint = `/api/trips/${trip._id}/${
+        isDriver ? "join" : "request-driver"
+      }`;
+      const requestData = isDriver
+        ? {
+            passengerId: userData.id,
+            requestedSeats: 1,
+            passengerName: userData.name,
+          }
+        : {
+            driverId: userData.id,
+            driverName: userData.name,
+          };
+
+      const response = await api.post(endpoint, requestData);
+      if (response.status === 200) {
+        alert("Request sent successfully!");
+      }
+    } catch (error) {
+      const errorMessage = error.response?.data || "Failed to submit request";
+      setError(errorMessage);
+      alert(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const calculateAge = (birthday) => {
-    if (!birthday) return null;
-    const birthDate = new Date(birthday);
-    const today = new Date();
-    let age = today.getFullYear() - birthDate.getFullYear();
-    const monthDiff = today.getMonth() - birthDate.getMonth();
-    if (
-      monthDiff < 0 ||
-      (monthDiff === 0 && today.getDate() < birthDate.getDate())
-    ) {
-      age--;
-    }
-    return age;
-  };
+  const renderDriverInfo = () => (
+    <div className={styles.driverSection}>
+      <img
+        src={trip.user?.photo || "/profile-icon.jpeg"}
+        alt=""
+        className={styles.driverPhoto}
+      />
+      <div className={styles.driverInfo}>
+        <h4>{trip.user?.name}</h4>
+        <div className={styles.userDetails}>
+          <span>{trip.user?.gender}</span>
+          {trip.user?.birthday && (
+            <span> • {calculateAge(trip.user.birthday)} years old</span>
+          )}
+        </div>
+        {trip.user?.rating ? (
+          <div className={styles.rating}>
+            <span>★ {trip.user.rating}</span>
+            <span>
+              • {trip.user.totalRides} {isDriver ? "driven" : "rides"}
+            </span>
+          </div>
+        ) : (
+          <span className={styles.noRating}>No ratings, yet</span>
+        )}
+        {isDriver && (
+          <div className={styles.carInfo}>
+            <div>
+              <strong>Car:</strong> {trip.user?.carModel}
+            </div>
+            <div>
+              <strong>License:</strong> {trip.user?.licensePlate}
+            </div>
+            {trip.user?.driverHistory && (
+              <div>
+                <strong>Experience:</strong> {trip.user.driverHistory}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
 
   return (
     <div className={styles.tripCard}>
-      <div className={styles.driverSection}>
-        <img
-          src={trip.user?.photo || "/profile-icon.jpeg"}
-          alt=""
-          className={styles.driverPhoto}
-        />
-        <div className={styles.driverInfo}>
-          <h4>{trip.user?.name}</h4>
-          <div className={styles.userDetails}>
-            <span>{trip.user?.gender}</span>
-            {trip.user?.birthday && (
-              <span> • {calculateAge(trip.user.birthday)} years old</span>
-            )}
-          </div>
-          {trip.user?.rating ? (
-            <div className={styles.rating}>
-              <span>★ {trip.user.rating}</span>
-              <span>
-                • {trip.user.totalRides} {isDriver ? "driven" : "rides"}
-              </span>
-            </div>
-          ) : (
-            <span className={styles.noRating}>No ratings, yet</span>
-          )}
-          {isDriver && (
-            <div className={styles.carInfo}>
-              <div>
-                <strong>Car:</strong> {trip.user?.carModel}
-              </div>
-              <div>
-                <strong>License:</strong> {trip.user?.licensePlate}
-              </div>
-              {trip.user?.driverHistory && (
-                <div>
-                  <strong>Experience:</strong> {trip.user.driverHistory}
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Rest of the component remains the same */}
+      {renderDriverInfo()}
       <div className={styles.tripInfo}>
         <div className={styles.tripHeader}>
           <div>
@@ -103,19 +175,7 @@ function SearchResultItem({ trip }) {
         <div className={styles.tripTimes}>
           <div>
             <strong>Leaving: </strong>
-            {(() => {
-              const [year, month, day] = trip.date.split("-");
-              const dateObj = new Date(
-                parseInt(year),
-                parseInt(month) - 1,
-                parseInt(day)
-              );
-              return `${dateObj.toLocaleDateString("en-US", {
-                weekday: "long",
-                month: "long",
-                day: "numeric",
-              })} at ${trip.time}`;
-            })()}
+            {formatDate(trip.date, trip.time)}
           </div>
         </div>
 
@@ -129,12 +189,26 @@ function SearchResultItem({ trip }) {
         </div>
 
         <div className={styles.tripFooter}>
-          <div className={styles.preferences}>
-            {trip.additionalMessage && (
-              <p className={styles.additionalMessage}>
-                Note: {trip.additionalMessage}
-              </p>
-            )}
+          {trip.additionalMessage && (
+            <p className={styles.additionalMessage}>
+              Note: {trip.additionalMessage}
+            </p>
+          )}
+          <div className={styles.requestButtonContainer}>
+            <button
+              onClick={handleRequest}
+              className={styles.requestButton}
+              disabled={isLoading || isTripFull}
+            >
+              {isLoading
+                ? "Sending Request..."
+                : isTripFull
+                ? "Trip Full"
+                : isDriver
+                ? "Request to Join"
+                : "Request to Drive"}
+            </button>
+            {error && <div className={styles.error}>{error}</div>}
           </div>
         </div>
       </div>

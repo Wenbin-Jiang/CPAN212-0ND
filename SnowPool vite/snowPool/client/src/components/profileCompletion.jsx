@@ -1,29 +1,38 @@
 import { useState } from "react";
-import styles from "./ProfileCompletion.module.css";
-import { useUserContext } from "../contexts/UserContext";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { useUserContext } from "../contexts/UserContext";
+import api from "../services/api";
+import styles from "./ProfileCompletion.module.css";
 
-const baseURL = "http://localhost:8001";
+const initialFormData = {
+  name: "",
+  address: "",
+  gender: "",
+  birthday: "",
+  phone: "",
+  driverHistory: "",
+  carModel: "",
+  licensePlate: "",
+  bio: "",
+  profilePicture: null,
+};
 
 const ProfileCompletion = () => {
-  const { setUser } = useUserContext();
-  const navigate = useNavigate();
+  const [formData, setFormData] = useState(initialFormData);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const [formData, setFormData] = useState({
-    name: "",
-    address: "",
-    gender: "",
-    birthday: "",
-    phone: "",
-    driverHistory: "",
-    carModel: "",
-    licensePlate: "",
-    bio: "",
-    profilePicture: null,
-  });
+  const { setUser } = useUserContext();
+  const navigate = useNavigate();
+
+  const handleInputChange = (e) => {
+    const { name, value, files } = e.target;
+    if (name === "profilePicture") {
+      setFormData((prev) => ({ ...prev, profilePicture: files[0] }));
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -31,70 +40,32 @@ const ProfileCompletion = () => {
     setError("");
 
     try {
-      const token = localStorage.getItem("authToken");
-
-      // Create the profile data object with profileComplete flag
       const profileData = {
         ...formData,
-        profileComplete: true, // Explicitly set profileComplete to true
+        profileComplete: true,
       };
-      delete profileData.profilePicture; // Remove profilePicture from JSON data
+      delete profileData.profilePicture;
 
-      // First, update profile data
-      const response = await axios.put(
-        `${baseURL}/api/users/profile/update`,
-        profileData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const response = await api.put("/api/users/profile/update", profileData);
 
-      // If there's a profile picture, handle it separately
       if (formData.profilePicture) {
         const pictureFormData = new FormData();
         pictureFormData.append("profilePicture", formData.profilePicture);
-
-        await axios.put(
-          `${baseURL}/api/users/profile/update`,
-          pictureFormData,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "multipart/form-data",
-            },
-          }
-        );
+        await api.put("/api/users/profile/update", pictureFormData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
       }
 
-      // Update the user context with the response data and ensure profileComplete is true
-      setUser({
-        ...response.data.user,
-        profileComplete: true,
-      });
-
-      // Force a reload of the profile data
-      const updatedProfile = await axios.get(`${baseURL}/api/users/profile`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
+      const updatedProfile = await api.get("/api/users/profile");
       setUser({
         ...updatedProfile.data.data,
         profileComplete: true,
       });
 
-      // Navigate to the profile page
       navigate("/userprofile", { replace: true });
-    } catch (err) {
-      setError(
-        err.response?.data?.message ||
-          "Error completing profile. Please try again."
-      );
-      console.error("Profile completion error:", err);
+    } catch (error) {
+      console.error("Profile completion error:", error);
+      setError(error.response?.data?.message || "Error completing profile");
     } finally {
       setLoading(false);
     }
@@ -103,7 +74,6 @@ const ProfileCompletion = () => {
   return (
     <div className={styles.completionForm}>
       <h1>Complete Your Profile</h1>
-
       <form className={styles.form} onSubmit={handleSubmit}>
         {error && <div className={styles.error}>{error}</div>}
 
@@ -125,13 +95,9 @@ const ProfileCompletion = () => {
               <i className="fa fa-camera"></i>
               <input
                 type="file"
+                name="profilePicture"
                 accept="image/*"
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    profilePicture: e.target.files[0],
-                  })
-                }
+                onChange={handleInputChange}
                 hidden
               />
             </label>
@@ -142,10 +108,11 @@ const ProfileCompletion = () => {
           <label>Full Name *</label>
           <input
             type="text"
+            name="name"
             required
             placeholder="Enter your full name"
             value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            onChange={handleInputChange}
           />
         </div>
 
@@ -153,12 +120,11 @@ const ProfileCompletion = () => {
           <label>Address *</label>
           <input
             type="text"
+            name="address"
             required
             placeholder="Enter your address"
             value={formData.address}
-            onChange={(e) =>
-              setFormData({ ...formData, address: e.target.value })
-            }
+            onChange={handleInputChange}
           />
         </div>
 
@@ -166,11 +132,10 @@ const ProfileCompletion = () => {
           <div className={styles.formGroup}>
             <label>Gender *</label>
             <select
+              name="gender"
               required
               value={formData.gender}
-              onChange={(e) =>
-                setFormData({ ...formData, gender: e.target.value })
-              }
+              onChange={handleInputChange}
             >
               <option value="">Select gender</option>
               <option value="Male">Male</option>
@@ -183,11 +148,10 @@ const ProfileCompletion = () => {
             <label>Birthday *</label>
             <input
               type="date"
+              name="birthday"
               required
               value={formData.birthday}
-              onChange={(e) =>
-                setFormData({ ...formData, birthday: e.target.value })
-              }
+              onChange={handleInputChange}
             />
           </div>
         </div>
@@ -196,12 +160,11 @@ const ProfileCompletion = () => {
           <label>Phone Number *</label>
           <input
             type="tel"
+            name="phone"
             required
             placeholder="Enter your phone number"
             value={formData.phone}
-            onChange={(e) =>
-              setFormData({ ...formData, phone: e.target.value })
-            }
+            onChange={handleInputChange}
           />
         </div>
 
@@ -209,12 +172,11 @@ const ProfileCompletion = () => {
           <label>Driver History *</label>
           <input
             type="text"
+            name="driverHistory"
             required
             placeholder="Enter your driver license class and history"
             value={formData.driverHistory}
-            onChange={(e) =>
-              setFormData({ ...formData, driverHistory: e.target.value })
-            }
+            onChange={handleInputChange}
           />
         </div>
 
@@ -223,12 +185,11 @@ const ProfileCompletion = () => {
             <label>Car Model *</label>
             <input
               type="text"
+              name="carModel"
               required
               placeholder="Enter your car model"
               value={formData.carModel}
-              onChange={(e) =>
-                setFormData({ ...formData, carModel: e.target.value })
-              }
+              onChange={handleInputChange}
             />
           </div>
 
@@ -236,12 +197,11 @@ const ProfileCompletion = () => {
             <label>License Plate *</label>
             <input
               type="text"
+              name="licensePlate"
               required
               placeholder="Enter your license plate"
               value={formData.licensePlate}
-              onChange={(e) =>
-                setFormData({ ...formData, licensePlate: e.target.value })
-              }
+              onChange={handleInputChange}
             />
           </div>
         </div>
@@ -249,9 +209,10 @@ const ProfileCompletion = () => {
         <div className={styles.formGroup}>
           <label>Bio</label>
           <textarea
+            name="bio"
             placeholder="Tell us about yourself..."
             value={formData.bio}
-            onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
+            onChange={handleInputChange}
           />
         </div>
 

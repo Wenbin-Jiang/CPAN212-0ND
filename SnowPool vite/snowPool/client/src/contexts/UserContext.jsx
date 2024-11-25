@@ -1,8 +1,7 @@
 import { createContext, useState, useContext, useEffect } from "react";
-import axios from "axios";
+import api from "../services/api";
 
 const UserContext = createContext();
-const baseURL = "http://localhost:8001";
 
 export const UserProvider = ({ children }) => {
   const [profileComplete, setProfileComplete] = useState(false);
@@ -11,31 +10,26 @@ export const UserProvider = ({ children }) => {
 
   const checkUserProfile = async () => {
     const token = localStorage.getItem("authToken");
-    if (token) {
-      try {
-        const response = await axios.get(`${baseURL}/api/users/profile`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        // Ensure we're setting both user data and profile completion status
-        const user = response.data.data;
-        setUserData(user);
-        setProfileComplete(!!user.profileComplete); // Convert to boolean explicitly
-      } catch (error) {
-        console.error("Error fetching user profile:", error);
-        // Clear data on error
-        setUserData(null);
-        setProfileComplete(false);
-        localStorage.removeItem("authToken");
-      }
-    } else {
-      // Clear data if no token exists
+    if (!token) {
       setUserData(null);
       setProfileComplete(false);
+      setLoading(false);
+      return;
     }
-    setLoading(false);
+
+    try {
+      const response = await api.get("/users/profile");
+      const user = response.data.data;
+      setUserData(user);
+      setProfileComplete(!!user.profileComplete);
+    } catch (error) {
+      console.error("Error fetching user profile:", error);
+      setUserData(null);
+      setProfileComplete(false);
+      localStorage.removeItem("authToken");
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -45,22 +39,14 @@ export const UserProvider = ({ children }) => {
   const setUser = async (data) => {
     try {
       setUserData(data);
-      setProfileComplete(!!data.profileComplete); // Convert to boolean explicitly
+      setProfileComplete(!!data.profileComplete);
 
-      // If this is a profile completion update, verify the profile status
+      // Verify profile status if profile is complete
       if (data.profileComplete) {
-        const token = localStorage.getItem("authToken");
-        if (token) {
-          const response = await axios.get(`${baseURL}/api/users/profile`, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
-
-          const user = response.data.data;
-          setUserData(user);
-          setProfileComplete(!!user.profileComplete);
-        }
+        const response = await api.get("/users/profile");
+        const user = response.data.data;
+        setUserData(user);
+        setProfileComplete(!!user.profileComplete);
       }
     } catch (error) {
       console.error("Error updating user data:", error);
@@ -73,26 +59,21 @@ export const UserProvider = ({ children }) => {
     setProfileComplete(false);
   };
 
-  // Add a refresh function that can be called when needed
   const refreshUserProfile = async () => {
     setLoading(true);
     await checkUserProfile();
   };
 
-  return (
-    <UserContext.Provider
-      value={{
-        profileComplete,
-        userData,
-        setUser,
-        logout,
-        loading,
-        refreshUserProfile, // Export the refresh function
-      }}
-    >
-      {children}
-    </UserContext.Provider>
-  );
+  const value = {
+    profileComplete,
+    userData,
+    setUser,
+    logout,
+    loading,
+    refreshUserProfile,
+  };
+
+  return <UserContext.Provider value={value}>{children}</UserContext.Provider>;
 };
 
 export const useUserContext = () => {
