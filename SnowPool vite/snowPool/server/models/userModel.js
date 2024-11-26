@@ -22,6 +22,7 @@ const userSchema = new mongoose.Schema({
         enum: [
           "joinRequest",
           "acceptedRequest",
+          "declinedRequest",
           "driverRequest",
           "acceptedDriverRequest",
           "declinedDriverRequest",

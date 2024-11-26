@@ -62,13 +62,14 @@ const tripSchema = new mongoose.Schema({
   joinRequests: [
     {
       passenger: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+      passengerName: String,
       requestedSeats: { type: Number, min: 1 },
       status: {
         type: String,
         enum: ["Pending", "Accepted", "Declined"],
         default: "Pending",
       },
-      createdAt: { type: Date, default: Date.now },
+      requestedAt: { type: Date, default: Date.now },
       respondedAt: { type: Date },
     },
   ],
@@ -77,6 +78,7 @@ const tripSchema = new mongoose.Schema({
   passengers: [
     {
       user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+      name: String,
       seatsBooked: { type: Number },
       joinedAt: { type: Date, default: Date.now },
     },
@@ -101,12 +103,13 @@ const tripSchema = new mongoose.Schema({
   driverRequests: [
     {
       driver: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+      driverName: String,
       status: {
         type: String,
         enum: ["Pending", "Accepted", "Declined"],
         default: "Pending",
       },
-      createdAt: { type: Date, default: Date.now },
+      requestedAt: { type: Date, default: Date.now },
       respondedAt: { type: Date },
     },
   ],
@@ -115,7 +118,8 @@ const tripSchema = new mongoose.Schema({
   driver: [
     {
       user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-      joinedAt: { type: Date, default: Date.now },
+      name: String,
+      acceptedAt: { type: Date, default: Date.now },
     },
   ],
 

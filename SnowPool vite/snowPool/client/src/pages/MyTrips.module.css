@@ -152,3 +152,44 @@
   color: #0f0f0f;
   font-size: 1.5rem;
 }
+.requestsSection {
+  margin-top: 1rem;
+  border-top: 1px solid #eee;
+  padding-top: 1rem;
+}
+
+.request {
+  background: rgba(255, 255, 255, 0.5);
+  padding: 1rem;
+  margin-bottom: 0.5rem;
+  border-radius: 4px;
+}
+
+.requestActions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.acceptButton {
+  background: #00c46a;
+  color: white;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.declineButton {
+  background: #dc3545;
+  color: white;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.requestStatus {
+  margin-top: 0.5rem;
+  font-weight: bold;
+}

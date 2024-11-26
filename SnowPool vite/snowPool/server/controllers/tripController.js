@@ -1,69 +1,6 @@
 const Trip = require("../models/tripsModal");
 const User = require("../models/userModel");
 
-// const createJoinRequest = async (req, res) => {
-//   try {
-//     const { tripId } = req.params;
-//     const { passengerId, requestedSeats, passengerName } = req.body;
-
-//     // Find the trip by its ID and populate the driver (user) data
-//     const trip = await Trip.findById(tripId).populate("user");
-
-//     if (!trip || trip.tripType !== "driver") {
-//       return res.status(404).send("Trip not found or not a driver trip");
-//     }
-
-//     // Ensure the user is not the driver
-//     if (trip.user._id.toString() === passengerId) {
-//       return res.status(400).send("You cannot join your own trip.");
-//     }
-
-//     // Check if the user has already sent a request for this trip
-//     const existingRequest = trip.joinRequests.find(
-//       (request) => request.passenger.toString() === passengerId
-//     );
-
-//     if (existingRequest) {
-//       return res
-//         .status(400)
-//         .send("You have already sent a request for this trip.");
-//     }
-
-//     // Check if there are enough seats available
-//     if (trip.seatsAvailable < requestedSeats) {
-//       return res.status(400).send("Not enough seats available");
-//     }
-
-//     // Add the join request
-//     trip.joinRequests.push({
-//       passenger: passengerId,
-//       requestedSeats,
-//       status: "Pending",
-//     });
-
-//     // Update the available seats on the trip
-//     trip.seatsAvailable -= requestedSeats;
-
-//     // Save the updated trip
-//     await trip.save();
-
-//     // Find the driver (user) to send the notification
-//     const driver = await User.findById(trip.user._id);
-//     driver.notifications.push({
-//       type: "joinRequest",
-//       trip: trip._id,
-//       message: `${passengerName} has requested ${requestedSeats} seat(s).`,
-//     });
-
-//     // Save the updated driver notifications
-//     await driver.save();
-
-//     res.status(200).send("Join request sent");
-//   } catch (error) {
-//     res.status(500).send(error.message);
-//   }
-// };
-
 const createJoinRequest = async (req, res) => {
   try {
     const { tripId } = req.params;
@@ -100,7 +37,9 @@ const createJoinRequest = async (req, res) => {
     trip.joinRequests.push({
       passenger: passengerId,
       requestedSeats,
+      passengerName,
       status: "Pending",
+      requestedAt: new Date(),
     });
 
     // Save the updated trip
@@ -111,7 +50,8 @@ const createJoinRequest = async (req, res) => {
     driver.notifications.push({
       type: "joinRequest",
       trip: trip._id,
-      message: `${passengerName} has requested ${requestedSeats} seat(s) for the trip.`,
+      message: `${passengerName} has requested ${requestedSeats} seat(s) for the your trip from ${trip.origin} to ${trip.destination} on ${trip.date} at ${trip.time}.`,
+      createdAt: new Date(),
     });
 
     await driver.save();
@@ -128,7 +68,7 @@ const createJoinRequest = async (req, res) => {
 const handleJoinRequest = async (req, res) => {
   try {
     const { tripId, requestId } = req.params;
-    const { action } = req.body; // "Accept" or "Decline"
+    const { action } = req.body;
 
     // Validate action
     if (!["Accept", "Decline"].includes(action)) {
@@ -137,65 +77,57 @@ const handleJoinRequest = async (req, res) => {
         .send("Invalid action. Must be 'Accept' or 'Decline'.");
     }
 
-    // Find the trip by ID and populate joinRequests with passengers
-    const trip = await Trip.findById(tripId).populate("joinRequests.passenger");
+    const trip = await Trip.findById(tripId);
 
     if (!trip) {
       return res.status(404).send("Trip not found.");
     }
 
-    // Check if the authenticated user is the driver (trip creator)
     if (req.user.id !== trip.user._id.toString()) {
       return res
         .status(403)
         .send("You are not authorized to manage this request.");
     }
 
-    // Find the specific join request
     const request = trip.joinRequests.id(requestId);
     if (!request) {
       return res.status(404).send("Join request not found.");
     }
 
-    // Check if the request is already handled
     if (request.status !== "Pending") {
       return res
         .status(400)
         .send("This join request has already been handled.");
     }
 
-    // Handle the request based on action
     if (action === "Accept") {
-      // Ensure seats are available
       if (trip.seatsAvailable < request.requestedSeats) {
         return res.status(400).send("Not enough seats available.");
       }
 
-      // Accept the request: Update trip and request status
       trip.passengers.push({
-        user: request.passenger._id,
+        user: request.passenger,
+        name: request.passengerName,
         seatsBooked: request.requestedSeats,
       });
+
       trip.seatsAvailable -= request.requestedSeats;
       request.status = "Accepted";
-    } else if (action === "Decline") {
-      // Decline the request: Update request status
+    } else {
       request.status = "Declined";
     }
 
-    request.respondedAt = new Date(); // Record response time
+    request.respondedAt = new Date();
     await trip.save();
 
-    // Notify the passenger
     const passenger = await User.findById(request.passenger._id);
     if (passenger) {
       passenger.notifications.push({
         type: action === "Accept" ? "acceptedRequest" : "declinedRequest",
         trip: trip._id,
-        message:
-          action === "Accept"
-            ? `Your request to join the trip from ${trip.origin} to ${trip.destination} has been accepted.`
-            : `Your request to join the trip from ${trip.origin} to ${trip.destination} has been declined.`,
+        message: `Your request to join the trip from ${trip.origin} to ${
+          trip.destination
+        } has been ${action.toLowerCase()}.`,
         createdAt: new Date(),
       });
       await passenger.save();
@@ -244,7 +176,9 @@ const createDriverRequest = async (req, res) => {
     // Add the driver request (no seat required for driver requests)
     trip.driverRequests.push({
       driver: driverId,
+      driverName,
       status: "Pending",
+      requestedAt: new Date(),
     });
 
     // Save the updated trip
@@ -255,7 +189,8 @@ const createDriverRequest = async (req, res) => {
     passenger.notifications.push({
       type: "driverRequest",
       trip: trip._id,
-      message: `${driverName} has requested to become the driver for your trip.`,
+      message: `${driverName} has requested to become the driver for your trip on ${trip.date} from ${trip.origin} to ${trip.destination}.`,
+      createdAt: new Date(),
     });
 
     await passenger.save();
@@ -272,7 +207,7 @@ const createDriverRequest = async (req, res) => {
 const handleDriverRequest = async (req, res) => {
   try {
     const { tripId, requestId } = req.params;
-    const { action } = req.body; // "Accept" or "Decline"
+    const { action } = req.body;
 
     // Validate action
     if (!["Accept", "Decline"].includes(action)) {
@@ -282,7 +217,9 @@ const handleDriverRequest = async (req, res) => {
     }
 
     // Find the trip by ID and populate driverRequests with drivers
-    const trip = await Trip.findById(tripId).populate("driverRequests.driver");
+    const trip = await Trip.findById(tripId)
+      .populate("driverRequests.driver")
+      .populate("user");
 
     if (!trip) {
       return res.status(404).send("Trip not found.");
@@ -311,7 +248,12 @@ const handleDriverRequest = async (req, res) => {
     // Handle the request based on action
     if (action === "Accept") {
       // Accept the request: Update trip and request status
-      trip.driver = request.driver._id; // Set the driver of the trip
+      // Set the driver of the trip
+      trip.driver = {
+        user: request.driver._id,
+        name: request.driverName,
+        acceptedAt: new Date(),
+      };
       request.status = "Accepted";
       trip.requestStatus = "Request Filled";
     } else if (action === "Decline") {
@@ -353,15 +295,10 @@ const handleDriverRequest = async (req, res) => {
 
 const createTrip = async (req, res) => {
   try {
-    console.log("Request body:", req.body); // Debug log
-    console.log("User:", req.user); // Debug log
-
     const trip = new Trip({
       ...req.body,
       user: req.user.id,
     });
-
-    console.log("Trip to save:", trip); // Debug log
 
     const savedTrip = await trip.save();
     res.status(201).json(savedTrip);
