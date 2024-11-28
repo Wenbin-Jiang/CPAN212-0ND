@@ -32,6 +32,7 @@ const formatDate = (dateString, time) => {
 };
 
 function SearchResultItem({ trip }) {
+  console.log("trip data", trip);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -66,26 +67,22 @@ function SearchResultItem({ trip }) {
     setError(null);
 
     try {
-      const endpoint = `/api/trips/${trip._id}/${
-        isDriver ? "join" : "request-driver"
-      }`;
-      const requestData = isDriver
-        ? {
-            passengerId: userData.id,
-            requestedSeats: 1,
-            passengerName: userData.name,
-          }
-        : {
-            driverId: userData.id,
-            driverName: userData.name,
-          };
+      const endpoint = `/api/bookings/trips/${trip._id}/request`;
+      const requestData = {
+        requestedSeats: 1,
+        requestType: isDriver ? "passenger" : "driver",
+        ...(isDriver ? {} : { willingToPay: trip.willingToPay }),
+      };
 
       const response = await api.post(endpoint, requestData);
-      if (response.status === 200) {
-        alert("Request sent successfully!");
+      if (response) {
+        alert(response.message || "Booking request sent successfully!");
       }
     } catch (error) {
-      const errorMessage = error.response?.data || "Failed to submit request";
+      const errorMessage =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Failed to submit request";
       setError(errorMessage);
       alert(errorMessage);
     } finally {
@@ -110,7 +107,8 @@ function SearchResultItem({ trip }) {
         </div>
         {trip.user?.rating ? (
           <div className={styles.rating}>
-            <span>★ {trip.user.rating}</span>
+            <span>★ {trip.user.rating || "N/A"}</span>
+
             <span>
               • {trip.user.totalRides} {isDriver ? "driven" : "rides"}
             </span>
@@ -120,9 +118,12 @@ function SearchResultItem({ trip }) {
         )}
         {isDriver && (
           <div className={styles.carInfo}>
-            <div>
-              <strong>Car:</strong> {trip.user?.carModel}
-            </div>
+            {trip.user?.carModel && (
+              <div>
+                <strong>Car:</strong> {trip.user.carModel}
+              </div>
+            )}
+
             <div>
               <strong>License:</strong> {trip.user?.licensePlate}
             </div>
@@ -198,7 +199,9 @@ function SearchResultItem({ trip }) {
             <button
               onClick={handleRequest}
               className={styles.requestButton}
-              disabled={isLoading || isTripFull}
+              disabled={
+                isLoading || isTripFull || userData.id === trip.user._id
+              }
             >
               {isLoading
                 ? "Sending Request..."
@@ -208,6 +211,7 @@ function SearchResultItem({ trip }) {
                 ? "Request to Join"
                 : "Request to Drive"}
             </button>
+
             {error && <div className={styles.error}>{error}</div>}
           </div>
         </div>

@@ -17,17 +17,33 @@ const initialFormData = {
   profilePicture: null,
 };
 
+// Error Alert Component
+const ErrorAlert = ({ message, onClose }) => (
+  <div className={styles.alertOverlay}>
+    <div className={styles.alertBox}>
+      <p>{message}</p>
+      <button onClick={onClose}>OK</button>
+    </div>
+  </div>
+);
+
 const ProfileCompletion = () => {
   const [formData, setFormData] = useState(initialFormData);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-
   const { setUser } = useUserContext();
   const navigate = useNavigate();
 
   const handleInputChange = (e) => {
     const { name, value, files } = e.target;
-    if (name === "profilePicture") {
+    setError(""); // Clear error on input change
+
+    if (name === "profilePicture" && files[0]) {
+      // Validate image size (5MB limit)
+      if (files[0].size > 5000000) {
+        setError("Image size should be less than 5MB");
+        return;
+      }
       setFormData((prev) => ({ ...prev, profilePicture: files[0] }));
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }));
@@ -40,14 +56,17 @@ const ProfileCompletion = () => {
     setError("");
 
     try {
+      // Create profile data without profile picture
       const profileData = {
         ...formData,
         profileComplete: true,
       };
       delete profileData.profilePicture;
 
-      const response = await api.put("/api/users/profile/update", profileData);
+      // Update profile data
+      const response = await api.put("/api/users/profile", profileData);
 
+      // Handle profile picture upload if exists
       if (formData.profilePicture) {
         const pictureFormData = new FormData();
         pictureFormData.append("profilePicture", formData.profilePicture);
@@ -56,6 +75,7 @@ const ProfileCompletion = () => {
         });
       }
 
+      // Get updated profile
       const updatedProfile = await api.get("/api/users/profile");
       setUser({
         ...updatedProfile.data.data,
@@ -232,6 +252,7 @@ const ProfileCompletion = () => {
         >
           {loading ? "Completing Profile..." : "Complete Profile"}
         </button>
+        {error && <ErrorAlert message={error} onClose={() => setError("")} />}
       </form>
     </div>
   );

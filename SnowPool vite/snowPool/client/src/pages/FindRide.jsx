@@ -28,12 +28,10 @@ function FindRide() {
         },
       });
 
-      console.log("Search results:", response.data);
       setSearchResults(response.data);
     } catch (error) {
       const errorMessage = error.response?.data?.message || error.message;
       setError(errorMessage);
-      console.error("Search error:", errorMessage);
     } finally {
       setIsLoading(false);
     }

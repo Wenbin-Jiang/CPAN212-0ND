@@ -11,10 +11,20 @@
   background-position: center;
 }
 
-.profileSection {
-  margin: 2rem 0 4rem 0;
+/* Container for Profile and Notifications */
+.profileAndNotifications {
+  display: flex;
+  justify-content: space-between;
+  margin: 5rem 0;
   max-width: 1200px;
-  margin: 0 auto;
+}
+
+.notificationsSection {
+  margin-left: 0;
+}
+.profileSection {
+  flex: 3;
+  max-width: 60%;
 }
 
 .profileInfo {

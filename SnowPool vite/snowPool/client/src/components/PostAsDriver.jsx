@@ -59,29 +59,27 @@ export default function PostAsDriver() {
 
       const tripData = {
         origin: departure.address,
-        originLatLng: [departure.lat, departure.lng],
+        originLatLng: [departure.lng, departure.lat],
         destination: destination.address,
-        destinationLatLng: [destination.lat, destination.lng],
+        destinationLatLng: [destination.lng, destination.lat],
         date,
         time,
         seatsAvailable: parseInt(seatsAvailable),
         pricePerSeat: parseInt(cost),
         additionalMessage: message,
+        tripType: "driver",
       };
 
-      const response = await api.post("/api/trips/driver", tripData);
+      const response = await api.post("/api/trips", tripData);
 
-      if (response.data) {
+      if (response._id) {
         alert("Trip created successfully!");
         resetForm();
+      } else {
+        throw new Error(response.message || "Failed to create trip");
       }
     } catch (error) {
-      setError(
-        error.response?.data?.message ||
-          error.message ||
-          "Failed to create trip"
-      );
-      console.error("Error creating trip:", error);
+      setError(error?.message || "Failed to create trip");
     } finally {
       setIsLoading(false);
     }

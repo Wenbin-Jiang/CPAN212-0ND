@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUserContext } from "../contexts/UserContext";
+import Notifications from "../components/Notifications";
 import PageNav from "../components/PageNav";
 import Footer from "../components/Footer";
 import styles from "./Dashboard.module.css";
@@ -137,7 +138,13 @@ const Dashboard = () => {
   return (
     <div className={styles.dashboardContainer}>
       <PageNav />
-      {renderProfileSection()}
+
+      <div className={styles.profileAndNotifications}>
+        <div className={styles.profileSection}>{renderProfileSection()}</div>
+        <div className={styles.notificationsSection}>
+          <Notifications />
+        </div>
+      </div>
       {renderCommunitySection()}
       <Footer />
     </div>

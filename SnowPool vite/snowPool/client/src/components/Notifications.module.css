@@ -1,0 +1,108 @@
+.notificationsContainer {
+  background: #f9f9f971;
+  border: 1px solid #e6e6e6;
+  border-radius: 8px;
+  margin: 0;
+  padding: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  width: 500px;
+}
+
+.notificationsContainer h1,
+.notificationsContainer p {
+  color: black;
+  font-weight: 800;
+  margin-left: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.notificationItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.8rem;
+  margin-bottom: 1rem;
+  background: #fff;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  transition: background-color 0.3s ease;
+  color: black;
+}
+
+.notificationItem.read {
+  background: #f0f0f09b;
+}
+
+.markAsReadButton {
+  background-color: #00c46a;
+  color: black;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  width: auto;
+  transition: background-color 0.2s ease;
+}
+
+.markAsReadButton:hover {
+  background-color: #0aac60;
+}
+
+.expandButton {
+  background-color: #00c46a;
+  color: black;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  margin: top 1rem;
+  margin-bottom: 1rem;
+  margin-left: 1rem;
+  transition: background-color 0.2s ease;
+}
+
+.expandButton:hover {
+  background-color: #0aac60;
+}
+
+.alreadyReadMessage {
+  font-size: 0.9rem;
+  color: black;
+  margin-left: auto;
+  padding: 0.5rem 1rem;
+  background: #e9ecef;
+  border-radius: 4px;
+}
+
+.readNotifications h3 {
+  margin-top: 2rem;
+  font-size: 1.2rem;
+  color: #333;
+}
+
+.readNotifications ul {
+  list-style-type: none;
+  padding-left: 0;
+}
+
+.paginationControls {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1rem;
+}
+
+.pageButton {
+  background-color: #00c46a;
+  color: black;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.pageButton:hover {
+  background-color: #0aac60;
+}

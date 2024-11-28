@@ -1,28 +1,81 @@
 const Payment = require("../models/paymentModal");
+const Booking = require("../models/bookingModal");
+const User = require("../models/userModel");
 
-// Create Payment
-exports.createPayment = async (req, res) => {
+const createPayment = async (req, res) => {
   try {
-    const { booking, amount, method } = req.body;
+    const { bookingId, paymentMethod } = req.body;
 
-    const newPayment = new Payment({ booking, amount, method });
-    const savedPayment = await newPayment.save();
+    const booking = await Booking.findById(bookingId);
+    if (!booking) {
+      return res.status(404).json({ message: "Booking not found" });
+    }
 
-    res.status(201).json({ success: true, payment: savedPayment });
-  } catch (err) {
-    res.status(400).json({ success: false, error: err.message });
+    const payment = new Payment({
+      booking: bookingId,
+      amount: booking.totalAmount,
+      paymentMethod,
+      status: "pending",
+    });
+
+    await payment.save();
+
+    booking.paymentStatus = "pending";
+    await booking.save();
+
+    res.status(201).json(payment);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 };
 
-// Get All Payments
-exports.getPayments = async (req, res) => {
+const confirmPayment = async (req, res) => {
   try {
-    const payments = await Payment.find().populate(
-      "booking",
-      "trip amount status"
-    );
-    res.json({ success: true, payments });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    const { paymentId } = req.params;
+    const { transactionId } = req.body;
+
+    const payment = await Payment.findById(paymentId);
+    if (!payment) {
+      return res.status(404).json({ message: "Payment not found" });
+    }
+
+    payment.status = "completed";
+    payment.transactionId = transactionId;
+    await payment.save();
+
+    const booking = await Booking.findById(payment.booking);
+    booking.paymentStatus = "paid";
+    await booking.save();
+
+    const recipient = await User.findById(booking.driver);
+    recipient.notifications.push({
+      type: "paymentReceived",
+      booking: booking._id,
+      message: `Payment received for booking #${booking._id}`,
+    });
+    await recipient.save();
+
+    res.status(200).json(payment);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
+};
+
+const getPaymentsByUser = async (req, res) => {
+  try {
+    const bookings = await Booking.find({ passenger: req.user.id });
+    const payments = await Payment.find({
+      booking: { $in: bookings.map((b) => b._id) },
+    }).populate("booking");
+
+    res.status(200).json(payments);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+module.exports = {
+  createPayment,
+  confirmPayment,
+  getPaymentsByUser,
 };

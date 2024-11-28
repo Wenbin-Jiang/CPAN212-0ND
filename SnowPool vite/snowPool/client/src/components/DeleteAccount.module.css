@@ -1,3 +1,4 @@
+/* Container */
 .deleteSection {
   margin-top: 2rem;
   padding: 2rem;
@@ -9,6 +10,7 @@
   align-items: center;
 }
 
+/* Text Elements */
 .deleteSection h2 {
   color: #dc3545;
   margin-bottom: 1rem;
@@ -21,6 +23,7 @@
   text-align: center;
 }
 
+/* Delete Button */
 .deleteButton {
   background-color: #dc3545;
   color: white;
@@ -30,29 +33,19 @@
   cursor: pointer;
   font-weight: 600;
   transition: background-color 0.2s;
-  display: block;
   margin: 0 auto;
 }
 
-/* Rest of the CSS remains the same */
 .deleteButton:hover {
   background-color: #c82333;
 }
 
 .deleteButton:disabled {
-  background-color: #e4606d;
-  cursor: not-allowed;
-}
-
-.deleteButton:hover {
   background-color: #c82333;
-}
-
-.deleteButton:disabled {
-  background-color: #e4606d;
   cursor: not-allowed;
 }
 
+/* Error Message */
 .error {
   color: #dc3545;
   background-color: #f8d7da;
@@ -63,12 +56,10 @@
   text-align: center;
 }
 
+/* Modal */
 .modalOverlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  inset: 0;
   background: rgba(0, 0, 0, 0.5);
   z-index: 999;
 }
@@ -100,6 +91,7 @@
   color: #333;
 }
 
+/* Modal Buttons */
 .modalButtons {
   display: flex;
   gap: 1rem;
@@ -107,34 +99,31 @@
   justify-content: center;
 }
 
-.confirmButton {
-  background-color: #dc3545;
-  color: white;
+.confirmButton,
+.cancelButton {
   border: none;
   padding: 0.5rem 1rem;
   border-radius: 4px;
   cursor: pointer;
   font-weight: 600;
   font-size: 0.9rem;
+  color: white;
+}
+
+.confirmButton {
+  background-color: #dc3545;
+}
+
+.cancelButton {
+  background-color: #6c757d;
 }
 
 .confirmButton:hover {
   background-color: #c82333;
 }
 
-.cancelButton {
-  background-color: #6c757d;
-  color: white;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  cursor: pointer;
-  font-weight: 600;
-  font-size: 0.9rem;
-}
-
 .cancelButton:hover {
-  background-color: #5a6268;
+  background-color: #464a4e;
 }
 
 .confirmButton:disabled,

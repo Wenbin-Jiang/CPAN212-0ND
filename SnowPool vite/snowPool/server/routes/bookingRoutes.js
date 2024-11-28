@@ -1,13 +1,19 @@
 const express = require("express");
-const {
-  createBooking,
-  getBookings,
-} = require("../controllers/bookingController");
-
 const router = express.Router();
+const {
+  createBookingRequest,
+  handleBookingRequest,
+  getBookingsByUser,
+} = require("../controllers/bookingController");
+const protectAndAuthorize = require("../middleware/authMiddleware");
 
-// Routes for bookings
-router.post("/create", createBooking);
-router.get("/", getBookings);
+// All routes are protected
+router.post(
+  "/trips/:tripId/request",
+  protectAndAuthorize,
+  createBookingRequest
+);
+router.put("/:bookingId/handle", protectAndAuthorize, handleBookingRequest);
+router.get("/user/bookings", protectAndAuthorize, getBookingsByUser);
 
 module.exports = router;

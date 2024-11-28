@@ -1,14 +1,12 @@
 import React, { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useUserContext } from "../contexts/UserContext";
 import PageNav from "../components/PageNav";
 import Footer from "../components/Footer";
 import DeleteAccount from "../components/DeleteAccount";
 import ProfileCompletion from "../components/profileCompletion";
 import styles from "./ProfilePage.module.css";
-import { useUserContext } from "../contexts/UserContext";
-import { useNavigate } from "react-router-dom";
 import axios from "axios";
-
-const baseURL = "http://localhost:8001";
 
 const ProfilePage = () => {
   const { profileComplete, userData, setUser, loading } = useUserContext();
@@ -23,42 +21,39 @@ const ProfilePage = () => {
       }
 
       try {
-        const response = await axios.get(`${baseURL}/api/users/profile`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await axios.get(
+          `${import.meta.env.VITE_SERVER_BASE_URL}/api/users/profile`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+            timeout: 10000,
+          }
+        );
 
-        setUser({
-          ...response.data.data,
-          profileComplete: response.data.data.profileComplete,
-        });
+        if (response.data && response.data.data) {
+          setUser({
+            ...response.data.data,
+            profileComplete: response.data.data.profileComplete,
+          });
 
-        if (!response.data.data.profileComplete) {
-          navigate("/userprofile");
+          if (!response.data.data.profileComplete) {
+            navigate("/userprofile");
+          }
         }
       } catch (error) {
+        if (error.code === "ECONNABORTED") {
+          console.error("Request timed out");
+          return;
+        }
         console.error("Error fetching profile:", error);
         navigate("/login");
       }
     };
 
     checkAuth();
-  }, [navigate, setUser]);
+  }, []);
 
-  if (loading) {
-    return (
-      <div className={styles.loadingContainer}>
-        <div className={styles.loader}>Loading...</div>
-      </div>
-    );
-  }
-
-  if (!profileComplete) {
-    return <ProfileCompletion />;
-  }
-
-  // Calculate age from birthday
   const calculateAge = (birthday) => {
     const birthDate = new Date(birthday);
     const today = new Date();
@@ -73,7 +68,6 @@ const ProfilePage = () => {
     return age;
   };
 
-  // Format join date
   const formatJoinDate = (date) => {
     return new Date(date).toLocaleDateString("en-US", {
       month: "long",
@@ -81,38 +75,17 @@ const ProfilePage = () => {
     });
   };
 
-  const handleEditDescription = async () => {
-    // Implementation for editing description
-  };
+  if (loading || !userData) {
+    return (
+      <div className={styles.loadingContainer}>
+        <div className={styles.loader}>Loading...</div>
+      </div>
+    );
+  }
 
-  const handleProfilePictureUpdate = async (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    try {
-      const formData = new FormData();
-      formData.append("profilePicture", file);
-
-      const token = localStorage.getItem("authToken");
-      const response = await axios.put(
-        `${baseURL}/api/users/profile/update`,
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
-
-      setUser({
-        ...userData,
-        profilePicture: response.data.user.profilePicture,
-      });
-    } catch (error) {
-      console.error("Error updating profile picture:", error);
-    }
-  };
+  if (!profileComplete) {
+    return <ProfileCompletion />;
+  }
 
   return (
     <div className={styles.userProfile}>
@@ -122,18 +95,17 @@ const ProfilePage = () => {
           <div className={styles.leftColumn}>
             <div className={styles.avatarContainer}>
               <img
-                src={userData.profilePicture || "../profile-icon.jpeg"}
+                src={userData?.profilePicture || "/profile-icon.jpeg"}
                 alt="Profile"
                 className={styles.avatar}
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = "/profile-icon.jpeg";
+                }}
               />
               <label className={styles.cameraButton}>
                 <i className="fa fa-camera"></i>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleProfilePictureUpdate}
-                  hidden
-                />
+                <input type="file" accept="image/*" hidden />
               </label>
             </div>
 
@@ -149,18 +121,16 @@ const ProfilePage = () => {
           <div className={styles.descriptionSection}>
             <textarea
               className={styles.descriptionTextbox}
-              defaultValue={userData.bio}
+              value={userData.bio}
               readOnly
             />
-            <button
-              className={styles.editDescription}
-              onClick={handleEditDescription}
-            >
+            <button className={styles.editDescription}>
               <span className={styles.editIcon}>✏️</span>
               Edit description
             </button>
           </div>
         </div>
+
         <div className={styles.driverInfo}>
           <h2>Driver Information</h2>
           <div className={styles.driverDetails}>
@@ -186,6 +156,7 @@ const ProfilePage = () => {
             </div>
           </div>
         </div>
+
         <div className={styles.contacts}>
           <h2>Contacts</h2>
           <div className={styles.contactsList}>

@@ -18,10 +18,15 @@ export const UserProvider = ({ children }) => {
     }
 
     try {
-      const response = await api.get("/users/profile");
-      const user = response.data.data;
-      setUserData(user);
-      setProfileComplete(!!user.profileComplete);
+      const response = await api.get("/api/users/profile"); // Add /api prefix
+      if (response.success) {
+        // Check success flag
+        const user = response.data;
+        setUserData(user);
+        setProfileComplete(user.profileComplete);
+      } else {
+        throw new Error(response.message);
+      }
     } catch (error) {
       console.error("Error fetching user profile:", error);
       setUserData(null);
@@ -38,15 +43,21 @@ export const UserProvider = ({ children }) => {
 
   const setUser = async (data) => {
     try {
-      setUserData(data);
-      setProfileComplete(!!data.profileComplete);
+      if (!data) {
+        setUserData(null);
+        setProfileComplete(false);
+        return;
+      }
 
-      // Verify profile status if profile is complete
+      setUserData(data);
+      setProfileComplete(data.profileComplete);
+
       if (data.profileComplete) {
-        const response = await api.get("/users/profile");
-        const user = response.data.data;
-        setUserData(user);
-        setProfileComplete(!!user.profileComplete);
+        const response = await api.get("/api/users/profile");
+        if (response.success) {
+          setUserData(response.data);
+          setProfileComplete(response.data.profileComplete);
+        }
       }
     } catch (error) {
       console.error("Error updating user data:", error);
@@ -57,6 +68,7 @@ export const UserProvider = ({ children }) => {
     localStorage.removeItem("authToken");
     setUserData(null);
     setProfileComplete(false);
+    window.location.href = "/login"; // Add redirect
   };
 
   const refreshUserProfile = async () => {

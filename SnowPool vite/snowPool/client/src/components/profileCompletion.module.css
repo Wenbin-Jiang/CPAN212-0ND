@@ -1,9 +1,17 @@
+/* Container */
 .completionForm {
   max-width: 600px;
   margin: 0 auto;
   padding: 2rem;
 }
 
+.completionForm h1 {
+  color: black;
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+/* Form Layout */
 .form {
   display: flex;
   flex-direction: column;
@@ -11,6 +19,7 @@
   color: black;
 }
 
+/* Photo Upload Section */
 .photoSection {
   display: flex;
   justify-content: center;
@@ -55,6 +64,7 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
+/* Form Groups and Inputs */
 .formGroup {
   display: flex;
   flex-direction: column;
@@ -63,7 +73,7 @@
 
 .formRow {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, 1fr);
   gap: 1rem;
 }
 
@@ -81,6 +91,7 @@
   resize: vertical;
 }
 
+/* Agreement Section */
 .agreements {
   display: flex;
   gap: 0.5rem;
@@ -95,6 +106,7 @@
   cursor: pointer;
 }
 
+/* Submit Button */
 .submitButton {
   background: #007bff;
   color: white;

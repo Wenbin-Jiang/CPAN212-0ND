@@ -1,13 +1,15 @@
 const express = require("express");
+const router = express.Router();
 const {
   createPayment,
-  getPayments,
+  confirmPayment,
+  getPaymentsByUser,
 } = require("../controllers/paymentController");
+const protectAndAuthorize = require("../middleware/authMiddleware");
 
-const router = express.Router();
-
-// Routes for payments
-router.post("/create", createPayment);
-router.get("/", getPayments);
+// All routes are protected
+router.post("/", protectAndAuthorize, createPayment);
+router.put("/:paymentId/confirm", protectAndAuthorize, confirmPayment);
+router.get("/user/payments", protectAndAuthorize, getPaymentsByUser);
 
 module.exports = router;

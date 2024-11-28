@@ -1,299 +1,22 @@
 const Trip = require("../models/tripsModal");
 const User = require("../models/userModel");
 
-const createJoinRequest = async (req, res) => {
-  try {
-    const { tripId } = req.params;
-    const { passengerId, requestedSeats, passengerName } = req.body;
-
-    // Find the trip by its ID and populate the driver (user) data
-    const trip = await Trip.findById(tripId).populate("user");
-
-    if (!trip || trip.tripType !== "driver") {
-      return res.status(404).send("Trip not found or not a driver trip");
-    }
-
-    // Ensure the user is not the driver
-    if (trip.user._id.toString() === passengerId) {
-      return res.status(400).send("You cannot join your own trip.");
-    }
-
-    // Check if the user has already sent a request for this trip
-    const existingRequest = trip.joinRequests.find(
-      (request) => request.passenger?.toString() === passengerId
-    );
-
-    if (existingRequest) {
-      return res
-        .status(400)
-        .send("You have already sent a request for this trip.");
-    }
-
-    // Check if there are enough seats available
-    if (trip.seatsAvailable < requestedSeats) {
-      return res.status(400).send("Not enough seats available");
-    }
-
-    trip.joinRequests.push({
-      passenger: passengerId,
-      requestedSeats,
-      passengerName,
-      status: "Pending",
-      requestedAt: new Date(),
-    });
-
-    // Save the updated trip
-    await trip.save();
-
-    // Find the driver (user) to send the notification
-    const driver = await User.findById(trip.user._id);
-    driver.notifications.push({
-      type: "joinRequest",
-      trip: trip._id,
-      message: `${passengerName} has requested ${requestedSeats} seat(s) for the your trip from ${trip.origin} to ${trip.destination} on ${trip.date} at ${trip.time}.`,
-      createdAt: new Date(),
-    });
-
-    await driver.save();
-
-    res.status(200).send("Join request sent");
-  } catch (error) {
-    console.error(error);
-    res
-      .status(500)
-      .send("An error occurred while processing the join request.");
-  }
-};
-
-const handleJoinRequest = async (req, res) => {
-  try {
-    const { tripId, requestId } = req.params;
-    const { action } = req.body;
-
-    // Validate action
-    if (!["Accept", "Decline"].includes(action)) {
-      return res
-        .status(400)
-        .send("Invalid action. Must be 'Accept' or 'Decline'.");
-    }
-
-    const trip = await Trip.findById(tripId);
-
-    if (!trip) {
-      return res.status(404).send("Trip not found.");
-    }
-
-    if (req.user.id !== trip.user._id.toString()) {
-      return res
-        .status(403)
-        .send("You are not authorized to manage this request.");
-    }
-
-    const request = trip.joinRequests.id(requestId);
-    if (!request) {
-      return res.status(404).send("Join request not found.");
-    }
-
-    if (request.status !== "Pending") {
-      return res
-        .status(400)
-        .send("This join request has already been handled.");
-    }
-
-    if (action === "Accept") {
-      if (trip.seatsAvailable < request.requestedSeats) {
-        return res.status(400).send("Not enough seats available.");
-      }
-
-      trip.passengers.push({
-        user: request.passenger,
-        name: request.passengerName,
-        seatsBooked: request.requestedSeats,
-      });
-
-      trip.seatsAvailable -= request.requestedSeats;
-      request.status = "Accepted";
-    } else {
-      request.status = "Declined";
-    }
-
-    request.respondedAt = new Date();
-    await trip.save();
-
-    const passenger = await User.findById(request.passenger._id);
-    if (passenger) {
-      passenger.notifications.push({
-        type: action === "Accept" ? "acceptedRequest" : "declinedRequest",
-        trip: trip._id,
-        message: `Your request to join the trip from ${trip.origin} to ${
-          trip.destination
-        } has been ${action.toLowerCase()}.`,
-        createdAt: new Date(),
-      });
-      await passenger.save();
-    }
-
-    res.status(200).send(`Request ${action.toLowerCase()}ed successfully.`);
-  } catch (error) {
-    console.error(error);
-    res
-      .status(500)
-      .send("An error occurred while processing the join request.");
-  }
-};
-
-//to request driver role in passenger trip
-const createDriverRequest = async (req, res) => {
-  try {
-    const { tripId } = req.params;
-    const { driverId, driverName } = req.body;
-
-    // Find the trip by its ID and ensure it's a passenger-type trip
-    const trip = await Trip.findById(tripId).populate("user");
-
-    if (!trip || trip.tripType !== "passenger") {
-      return res.status(404).send("Trip not found or not a passenger trip.");
-    }
-
-    // Ensure the user is not the original passenger
-    if (trip.user._id.toString() === driverId) {
-      return res
-        .status(400)
-        .send("You cannot become the driver of your own trip.");
-    }
-
-    // Check if the user has already sent a request for this trip
-    const existingRequest = trip.driverRequests.find(
-      (request) => request.driver?.toString() === driverId
-    );
-
-    if (existingRequest) {
-      return res
-        .status(400)
-        .send("You have already sent a request for this trip.");
-    }
-
-    // Add the driver request (no seat required for driver requests)
-    trip.driverRequests.push({
-      driver: driverId,
-      driverName,
-      status: "Pending",
-      requestedAt: new Date(),
-    });
-
-    // Save the updated trip
-    await trip.save();
-
-    // Send notification to the original passenger (trip creator)
-    const passenger = await User.findById(trip.user._id);
-    passenger.notifications.push({
-      type: "driverRequest",
-      trip: trip._id,
-      message: `${driverName} has requested to become the driver for your trip on ${trip.date} from ${trip.origin} to ${trip.destination}.`,
-      createdAt: new Date(),
-    });
-
-    await passenger.save();
-
-    res.status(200).send("Driver request sent.");
-  } catch (error) {
-    console.error(error);
-    res
-      .status(500)
-      .send("An error occurred while processing the driver request.");
-  }
-};
-
-const handleDriverRequest = async (req, res) => {
-  try {
-    const { tripId, requestId } = req.params;
-    const { action } = req.body;
-
-    // Validate action
-    if (!["Accept", "Decline"].includes(action)) {
-      return res
-        .status(400)
-        .send("Invalid action. Must be 'Accept' or 'Decline'.");
-    }
-
-    // Find the trip by ID and populate driverRequests with drivers
-    const trip = await Trip.findById(tripId)
-      .populate("driverRequests.driver")
-      .populate("user");
-
-    if (!trip) {
-      return res.status(404).send("Trip not found.");
-    }
-
-    // Check if the authenticated user is the original passenger (trip creator)
-    if (req.user.id !== trip.user._id.toString()) {
-      return res
-        .status(403)
-        .send("You are not authorized to manage this request.");
-    }
-
-    // Find the specific driver request
-    const request = trip.driverRequests.id(requestId);
-    if (!request) {
-      return res.status(404).send("Driver request not found.");
-    }
-
-    // Check if the request is already handled
-    if (request.status !== "Pending") {
-      return res
-        .status(400)
-        .send("This driver request has already been handled.");
-    }
-
-    // Handle the request based on action
-    if (action === "Accept") {
-      // Accept the request: Update trip and request status
-      // Set the driver of the trip
-      trip.driver = {
-        user: request.driver._id,
-        name: request.driverName,
-        acceptedAt: new Date(),
-      };
-      request.status = "Accepted";
-      trip.requestStatus = "Request Filled";
-    } else if (action === "Decline") {
-      // Decline the request: Update request status
-      request.status = "Declined";
-    }
-
-    request.respondedAt = new Date(); // Record response time
-    await trip.save();
-
-    // Notify the user who requested to become the driver
-    const driver = await User.findById(request.driver._id);
-    if (driver) {
-      driver.notifications.push({
-        type:
-          action === "Accept"
-            ? "acceptedDriverRequest"
-            : "declinedDriverRequest",
-        trip: trip._id,
-        message:
-          action === "Accept"
-            ? `Your request to become the driver for the trip from ${trip.origin} to ${trip.destination} has been accepted.`
-            : `Your request to become the driver for the trip from ${trip.origin} to ${trip.destination} has been declined.`,
-        createdAt: new Date(),
-      });
-      await driver.save();
-    }
-
-    res
-      .status(200)
-      .send(`Driver request ${action.toLowerCase()}ed successfully.`);
-  } catch (error) {
-    console.error(error);
-    res
-      .status(500)
-      .send("An error occurred while processing the driver request.");
-  }
-};
-
 const createTrip = async (req, res) => {
+  console.log("Received data:", req.body);
+
+  if (
+    !req.body.origin ||
+    !req.body.destination ||
+    !req.body.date ||
+    !req.body.tripType
+  ) {
+    return res.status(400).json({ message: "Missing required fields." });
+  }
+
+  if (!req.user || !req.user.id) {
+    return res.status(401).json({ message: "User not authenticated." });
+  }
+
   try {
     const trip = new Trip({
       ...req.body,
@@ -301,45 +24,150 @@ const createTrip = async (req, res) => {
     });
 
     const savedTrip = await trip.save();
+
+    const userUpdate = await User.findByIdAndUpdate(
+      req.user.id,
+      { $push: { createdTrips: savedTrip._id } },
+      { new: true }
+    );
+
+    if (!userUpdate) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
     res.status(201).json(savedTrip);
   } catch (error) {
-    console.error("Error details:", error); // Debug log
-    res.status(500).json({
-      message: "Error creating trip",
-      error: error.message,
-    });
+    res
+      .status(500)
+      .json({ message: "An error occurred while creating the trip." });
   }
 };
 
-// Read
 const getAllTrips = async (req, res) => {
   try {
-    const trips = await Trip.find()
-      .populate(
-        "user",
-        "name email gender birthday carModel driverHistory licensePlate createdAt"
-      )
-      .sort({ createdAt: -1 });
+    const { origin, destination, date, tripType } = req.query;
+
+    const query = {};
+    if (origin) query.origin = new RegExp(origin, "i");
+    if (destination) query.destination = new RegExp(destination, "i");
+    if (date) query.date = new Date(date);
+    if (tripType) query.tripType = tripType;
+
+    const trips = await Trip.find(query)
+      .populate("user", "name email profilePicture ratings")
+      .sort("-createdAt");
+
     res.status(200).json(trips);
   } catch (error) {
-    res.status(500).json({ message: "Error fetching trips" });
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Search
+// const searchTrips = async (req, res) => {
+//   try {
+//     const { origin, destination, date, tripType } = req.query;
+//     console.log("req.query", req.query);
+//     const query = {
+//       origin: new RegExp(origin, "i"),
+//       destination: new RegExp(destination, "i"),
+//       date: date ? new Date(date) : { $exists: true },
+//     };
+//     console.log("query", query);
+
+//     if (tripType) {
+//       query.tripType = tripType;
+//     }
+
+//     const trips = await Trip.find(query)
+//       .populate({
+//         path: "user",
+//         select:
+//           "name email gender birthday carModel driverHistory licensePlate createdAt",
+//       })
+//       .sort({ createdAt: -1 });
+//     console.log(trips);
+//     res.status(200).json(trips);
+//   } catch (error) {
+//     res.status(500).json({ message: "Error searching trips" });
+//   }
+// };
+
+const searchTrips = async (req, res) => {
+  try {
+    const { origin, destination, date, tripType } = req.query;
+
+    let query = {};
+
+    if (origin && origin.address) {
+      query.origin = new RegExp(origin.address, "i");
+    }
+
+    if (destination && destination.address) {
+      query.destination = new RegExp(destination.address, "i");
+    }
+
+    if (date) {
+      const parsedDate = new Date(date);
+      if (!isNaN(parsedDate.getTime())) {
+        query.date = {
+          $gte: parsedDate.setHours(0, 0, 0, 0),
+          $lt: parsedDate.setHours(23, 59, 59, 999),
+        };
+      } else {
+        return res.status(400).json({ message: "Invalid date format" });
+      }
+    }
+
+    if (tripType) {
+      query.tripType = tripType;
+    }
+
+    const trips = await Trip.find(query)
+      .populate({
+        path: "user",
+        select:
+          "name email gender birthday carModel driverHistory licensePlate createdAt",
+      })
+      .sort({ createdAt: -1 });
+
+    if (trips.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "No trips found for your search" });
+    }
+
+    res.status(200).json(trips);
+  } catch (error) {
+    console.error("Error searching trips:", error.message);
+    res.status(500).json({ message: "Error searching trips" });
   }
 };
 
 const getMyTrips = async (req, res) => {
   try {
     const trips = await Trip.find({ user: req.user.id })
-      .populate("user", "name")
-      .sort({ createdAt: -1 });
+      .populate("bookings")
+      .sort("-createdAt");
+
+    console.log("my-trips response:", trips);
     res.status(200).json(trips);
   } catch (error) {
-    res.status(500).json({ message: "Error fetching your trips" });
+    res.status(500).json({ message: error.message });
   }
 };
 
 const getTripById = async (req, res) => {
   try {
-    const trip = await Trip.findById(req.params.id).populate("user", "name");
+    const trip = await Trip.findById(req.params.id)
+      .populate("user", "name email profilePicture ratings")
+      .populate({
+        path: "bookings",
+        populate: {
+          path: "passenger driver",
+          select: "name email profilePicture ratings",
+        },
+      });
 
     if (!trip) {
       return res.status(404).json({ message: "Trip not found" });
@@ -347,31 +175,10 @@ const getTripById = async (req, res) => {
 
     res.status(200).json(trip);
   } catch (error) {
-    res.status(500).json({ message: "Error fetching trip" });
+    res.status(500).json({ message: error.message });
   }
 };
 
-const getTripsByType = async (req, res) => {
-  try {
-    const { tripType } = req.params;
-
-    if (!["driver", "passenger"].includes(tripType)) {
-      return res.status(400).json({
-        message: "Invalid trip type. Must be 'driver' or 'passenger'",
-      });
-    }
-
-    const trips = await Trip.find({ tripType })
-      .populate("user", "name")
-      .sort({ createdAt: -1 });
-
-    res.status(200).json(trips);
-  } catch (error) {
-    res.status(500).json({ message: "Error fetching trips" });
-  }
-};
-
-// Update
 const updateTrip = async (req, res) => {
   try {
     const trip = await Trip.findOne({
@@ -388,19 +195,22 @@ const updateTrip = async (req, res) => {
     const updatedTrip = await Trip.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
     });
+
     res.status(200).json(updatedTrip);
   } catch (error) {
-    res.status(500).json({ message: "Error updating trip" });
+    res.status(500).json({ message: error.message });
   }
 };
 
-// Delete
 const deleteTrip = async (req, res) => {
   try {
     const trip = await Trip.findOne({
       _id: req.params.id,
       user: req.user.id,
     });
+    console.log("trip id", req.params.id);
+    console.log("user", req.user.id);
+    console.log("trip found", trip);
 
     if (!trip) {
       return res
@@ -409,52 +219,23 @@ const deleteTrip = async (req, res) => {
     }
 
     await Trip.findByIdAndDelete(req.params.id);
+
+    // Remove trip from user's created trips
+    await User.findByIdAndUpdate(req.user.id, {
+      $pull: { createdTrips: req.params.id },
+    });
     res.status(200).json({ message: "Trip deleted successfully" });
   } catch (error) {
-    res.status(500).json({ message: "Error deleting trip" });
-  }
-};
-
-// Search
-const searchTrips = async (req, res) => {
-  try {
-    const { origin, destination, date, tripType } = req.query;
-
-    const query = {
-      origin: new RegExp(origin, "i"),
-      destination: new RegExp(destination, "i"),
-      date: date ? new Date(date) : { $exists: true },
-    };
-
-    if (tripType) {
-      query.tripType = tripType;
-    }
-
-    const trips = await Trip.find(query)
-      .populate({
-        path: "user",
-        select:
-          "name email gender birthday carModel driverHistory licensePlate createdAt",
-      })
-      .sort({ createdAt: -1 });
-
-    res.status(200).json(trips);
-  } catch (error) {
-    res.status(500).json({ message: "Error searching trips" });
+    res.status(500).json({ message: error.message });
   }
 };
 
 module.exports = {
   createTrip,
   getAllTrips,
+  searchTrips,
   getMyTrips,
   getTripById,
-  getTripsByType,
   updateTrip,
   deleteTrip,
-  searchTrips,
-  createJoinRequest,
-  handleJoinRequest,
-  createDriverRequest,
-  handleDriverRequest,
 };

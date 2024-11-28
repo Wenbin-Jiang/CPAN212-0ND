@@ -17,10 +17,14 @@ const DeleteAccount = () => {
       setIsLoading(true);
       setError("");
 
-      await api.delete("/api/users/profile/delete");
+      const response = await api.delete("/api/users/profile");
 
-      logout();
-      navigate("/");
+      if (response.success) {
+        logout();
+        navigate("/");
+      } else {
+        throw new Error(response.message || "Failed to delete account");
+      }
     } catch (error) {
       console.error("Error deleting account:", error);
       setError(error.response?.data?.message || "Error deleting account");
@@ -29,7 +33,6 @@ const DeleteAccount = () => {
       setShowModal(false);
     }
   };
-
   const Modal = () => (
     <>
       <div

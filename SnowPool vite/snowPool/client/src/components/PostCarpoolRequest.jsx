@@ -73,21 +73,19 @@ export default function PostCarpoolRequest() {
         seatsRequired: parseInt(seatRequired),
         willingToPay: parseInt(willingToPay),
         additionalMessage: message,
+        tripType: "passenger",
       };
 
-      const response = await api.post("/api/trips/passenger", requestData);
+      const response = await api.post("/api/trips", requestData);
 
-      if (response.data) {
+      if (response._id) {
         alert("Carpool request created successfully!");
         resetForm();
+      } else {
+        throw new Error(response.message || "Failed to create request");
       }
     } catch (error) {
-      setError(
-        error.response?.data?.message ||
-          error.message ||
-          "Failed to create request"
-      );
-      console.error("Error creating request:", error);
+      setError(error?.message || "Failed to create request");
     } finally {
       setIsLoading(false);
     }
