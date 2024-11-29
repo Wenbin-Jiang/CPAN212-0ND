@@ -1,18 +1,6 @@
 import styles from "./SearchResults.module.css";
 import SearchResultItem from "./SearchResultItem";
-
-const getFirstPart = (address) => address?.split(",")[0] || "";
-
-const formatDate = (dateString) => {
-  const [year, month, day] = dateString.split("-");
-  const dateObj = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
-
-  return dateObj.toLocaleDateString("en-US", {
-    weekday: "long",
-    month: "long",
-    day: "numeric",
-  });
-};
+import { getFirstPart, formatDate } from "./utils";
 
 const groupTripsByDate = (trips) => {
   return trips.reduce((acc, trip) => {
@@ -47,8 +35,8 @@ function SearchResults({ results, searchOrigin, searchDestination }) {
     <div className={styles.searchResults}>
       <div className={styles.resultsHeader}>
         <h2>
-          Results from {getFirstPart(searchOrigin) || "anywhere"} to{" "}
-          {getFirstPart(searchDestination)}
+          Results from {getFirstPart(searchOrigin || "", ",") || "anywhere"} to{" "}
+          {getFirstPart(searchDestination || "", ",")}
         </h2>
       </div>
 

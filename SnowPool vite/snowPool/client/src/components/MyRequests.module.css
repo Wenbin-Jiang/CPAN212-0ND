@@ -1,0 +1,114 @@
+/* Booking List Container */
+.bookingsList {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Booking Card */
+.bookingCard {
+  width: 50%;
+  background: rgba(255, 255, 255, 0.422);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.bookingHeader {
+  margin-bottom: 16px;
+  color: #131314;
+  font-size: 1.5rem;
+}
+
+.bookingDetails {
+  font-size: 1.5rem;
+  color: #131314;
+  margin-bottom: 16px;
+}
+
+/* Booking Actions */
+.bookingActions {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.acceptButton,
+.declineButton {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1.4rem;
+  transition: background-color 0.2s;
+}
+
+.acceptButton {
+  background: #28a745;
+  color: white;
+}
+
+.acceptButton:hover {
+  background: #218838;
+}
+
+.declineButton {
+  background: #dc3545;
+  color: white;
+}
+
+.declineButton:hover {
+  background: #c82333;
+}
+
+/* Status Styles */
+.pendingStatus {
+  color: #f5a623;
+  font-style: italic;
+  text-align: center;
+  padding: 12px;
+  font-size: 1.4rem;
+  background: rgba(245, 166, 35, 0.1);
+  border-radius: 6px;
+}
+
+.pending {
+  color: #f5a623;
+  font-weight: bold;
+}
+
+.accepted {
+  color: #28a745;
+  font-weight: bold;
+}
+
+.declined {
+  color: #dc3545;
+  font-weight: bold;
+}
+
+/* Empty State */
+.empty {
+  text-align: center;
+  padding: 40px;
+  color: #f0ecec;
+  font-size: 3rem;
+}
+
+.findRideButton {
+  padding: 12px 24px;
+  background: #0084ff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: 16px;
+  font-size: 1.6rem;
+  transition: background-color 0.2s;
+}
+
+.findRideButton:hover {
+  background: #0066cc;
+}

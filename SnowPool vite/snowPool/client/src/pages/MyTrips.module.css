@@ -195,3 +195,44 @@
   margin-top: 0.5rem;
   font-weight: bold;
 }
+
+.loader {
+  width: 48px;
+  height: 48px;
+  border: 5px solid #f3f3f3;
+  border-top: 5px solid #3498db;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 20px auto;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.pendingStatus {
+  color: #f5a623;
+  font-style: italic;
+  text-align: center;
+  padding: 10px;
+}
+
+.pending {
+  color: #f5a623;
+  font-weight: bold;
+}
+
+.accepted {
+  color: #28a745;
+  font-weight: bold;
+}
+
+.declined {
+  color: #dc3545;
+  font-weight: bold;
+}

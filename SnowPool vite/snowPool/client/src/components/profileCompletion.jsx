@@ -56,7 +56,6 @@ const ProfileCompletion = () => {
     setError("");
 
     try {
-      // Create profile data without profile picture
       const profileData = {
         ...formData,
         profileComplete: true,

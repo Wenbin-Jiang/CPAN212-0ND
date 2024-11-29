@@ -65,14 +65,8 @@ const MyTrips = () => {
     try {
       const response = await api.delete(`/api/trips/${tripId}`);
 
-      if (
-        response?.status === 200 &&
-        response?.data?.message === "Trip deleted successfully"
-      ) {
-        // Fetch updated trips from the server after deletion
+      if (response && response?.message === "Trip deleted successfully") {
         await fetchTrips();
-
-        // Show success message
         alert("Trip successfully deleted");
       } else {
         alert("Failed to delete trip");
@@ -134,7 +128,7 @@ const MyTrips = () => {
           </button>
         </div>
 
-        {isLoading && <div>Loading...</div>}
+        {isLoading && <div className={styles.loader}>Loading...</div>}
         {error && <div className={styles.error}>{error}</div>}
 
         {activeTab === "driver" && (

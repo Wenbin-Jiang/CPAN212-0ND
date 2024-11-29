@@ -13,6 +13,7 @@ const userSchema = new mongoose.Schema(
     },
     profilePicture: {
       type: String,
+      default: "profile-icon.jpeg",
     },
     profileComplete: {
       type: Boolean,

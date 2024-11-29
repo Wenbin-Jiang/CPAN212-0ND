@@ -39,6 +39,7 @@ const tripSchema = new mongoose.Schema(
       maxlength: 500,
     },
     // Driver-specific fields
+
     seatsAvailable: {
       type: Number,
       min: 0,

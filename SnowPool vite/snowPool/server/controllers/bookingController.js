@@ -7,6 +7,7 @@ const createBookingRequest = async (req, res) => {
     const { tripId } = req.params;
     const { requestedSeats, requestType, willingToPay } = req.body;
     const userId = req.user.id;
+    const userName = req.user.name;
 
     // Check for existing booking
     const existingRequest = await Booking.findOne({
@@ -37,13 +38,16 @@ const createBookingRequest = async (req, res) => {
 
     // Prepare booking data
     const bookingData = {
+      user: userId,
       trip: tripId,
       requestType,
       status: "pending",
       pickupLocation: trip.origin,
       dropoffLocation: trip.destination,
       driver: requestType == "driver" ? userId : trip.user._id,
+      driverName: requestType == "driver" ? userName : trip.user.name,
       passenger: requestType == "passenger" ? userId : trip.user._id,
+      passengerName: requestType == "passenger" ? userName : trip.user.name,
       pickupLocation: {
         address: trip.origin,
         coordinates: trip.originLatLng,
@@ -188,11 +192,13 @@ const handleBookingRequest = async (req, res) => {
 };
 
 const getBookingsByUser = async (req, res) => {
-  console.log("User ID:", req.user.id); // Log the user ID to confirm it's set
   try {
-    const bookings = await Booking.find({ passenger: req.user.id })
+    const bookings = await Booking.find({
+      $or: [{ passenger: req.user.id }, { driver: req.user.id }],
+    })
       .populate("trip")
       .populate("passenger")
+      .populate("driver")
       .sort("-createdAt");
 
     console.log("Bookings response:", bookings);

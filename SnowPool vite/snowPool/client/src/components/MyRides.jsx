@@ -6,8 +6,8 @@ import { useNavigate } from "react-router-dom";
 const MyRides = ({ trips, handleDelete }) => {
   const navigate = useNavigate();
 
-  const handleFindRide = () => {
-    navigate("/findride");
+  const handlePostRide = () => {
+    navigate("/postride");
   };
 
   return (
@@ -15,8 +15,8 @@ const MyRides = ({ trips, handleDelete }) => {
       {trips.length === 0 ? (
         <div className={styles.empty}>
           <p>You have no upcoming rides.</p>
-          <button onClick={handleFindRide} className={styles.findRideButton}>
-            find a ride
+          <button onClick={handlePostRide} className={styles.postButton}>
+            Post a Ride
           </button>
         </div>
       ) : (

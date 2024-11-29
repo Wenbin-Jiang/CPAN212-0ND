@@ -2,8 +2,6 @@ const Trip = require("../models/tripsModal");
 const User = require("../models/userModel");
 
 const createTrip = async (req, res) => {
-  console.log("Received data:", req.body);
-
   if (
     !req.body.origin ||
     !req.body.destination ||
@@ -97,27 +95,11 @@ const searchTrips = async (req, res) => {
   try {
     const { origin, destination, date, tripType } = req.query;
 
-    let query = {};
-
-    if (origin && origin.address) {
-      query.origin = new RegExp(origin.address, "i");
-    }
-
-    if (destination && destination.address) {
-      query.destination = new RegExp(destination.address, "i");
-    }
-
-    if (date) {
-      const parsedDate = new Date(date);
-      if (!isNaN(parsedDate.getTime())) {
-        query.date = {
-          $gte: parsedDate.setHours(0, 0, 0, 0),
-          $lt: parsedDate.setHours(23, 59, 59, 999),
-        };
-      } else {
-        return res.status(400).json({ message: "Invalid date format" });
-      }
-    }
+    const query = {
+      origin: new RegExp(origin, "i"),
+      destination: new RegExp(destination, "i"),
+      date: date ? new Date(date) : { $exists: true },
+    };
 
     if (tripType) {
       query.tripType = tripType;
@@ -131,15 +113,8 @@ const searchTrips = async (req, res) => {
       })
       .sort({ createdAt: -1 });
 
-    if (trips.length === 0) {
-      return res
-        .status(404)
-        .json({ message: "No trips found for your search" });
-    }
-
     res.status(200).json(trips);
   } catch (error) {
-    console.error("Error searching trips:", error.message);
     res.status(500).json({ message: "Error searching trips" });
   }
 };
@@ -201,15 +176,12 @@ const updateTrip = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-
 const deleteTrip = async (req, res) => {
   try {
     const trip = await Trip.findOne({
       _id: req.params.id,
       user: req.user.id,
     });
-    console.log("trip id", req.params.id);
-    console.log("user", req.user.id);
     console.log("trip found", trip);
 
     if (!trip) {
