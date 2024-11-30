@@ -3,31 +3,54 @@ const mongoose = require("mongoose");
 const bookingSchema = new mongoose.Schema(
   {
     user: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
+      userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: true,
+      },
+      userName: {
+        type: String,
+      },
     },
     trip: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Trip",
-      required: true,
+      tripId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Trip",
+        required: true,
+      },
+      tripInitiator: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+      tripDate: {
+        type: Date,
+      },
+      tripTime: {
+        type: String,
+      },
+      userName: {
+        type: String,
+      },
     },
-    passenger: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-    },
-    passengerName: {
-      type: String,
-    },
+    passengers: [
+      {
+        userId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "User",
+          required: true,
+        },
+        name: String,
+      },
+    ],
     driver: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
+      user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: true,
+      },
+      name: String,
     },
-    driverName: {
-      type: String,
-    },
+
     requestType: {
       type: String,
       enum: ["passenger", "driver"],

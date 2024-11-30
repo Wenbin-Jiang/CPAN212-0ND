@@ -78,23 +78,26 @@ const MyTrips = () => {
     }
   };
 
-  const handleBookingAction = async (bookingId, action) => {
+  const handleBookingAction = async (bookingId, tripId, action) => {
     try {
       const response = await api.put(`/api/bookings/${bookingId}/handle`, {
+        tripId,
         action,
       });
-      if (response?.status === 200) {
-        setBookings((prev) =>
-          prev.filter((booking) => booking._id !== bookingId)
-        );
+      console.log(response);
+      if (response?.success) {
         await fetchBookings();
+        alert(`Request successfully ${response.data.status}`);
+      } else {
+        alert("An error occurred while handling request.");
       }
     } catch (err) {
       console.error("Booking action error:", err);
-      setError(err.message || "Failed to handle booking action");
+      throw new Error(
+        err.response?.data?.message || "Failed to handle booking action"
+      );
     }
   };
-
   const filteredTrips = allTrips.filter((trip) => trip.tripType === activeTab);
 
   return (

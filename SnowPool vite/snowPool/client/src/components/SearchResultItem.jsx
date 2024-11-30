@@ -73,16 +73,15 @@ function SearchResultItem({ trip }) {
         requestType: isDriver ? "passenger" : "driver",
         ...(isDriver ? {} : { willingToPay: trip.willingToPay }),
       };
-
+      console.log("request data send:", requestData);
       const response = await api.post(endpoint, requestData);
+      console.log("response data after send request", response);
       if (response) {
         alert(response.message || "Booking request sent successfully!");
       }
     } catch (error) {
-      const errorMessage =
-        error?.response?.data?.message ||
-        error?.message ||
-        "Failed to submit request";
+      console.log(error);
+      const errorMessage = error ? error.message : "Failed to submit request";
       setError(errorMessage);
       alert(errorMessage);
     } finally {

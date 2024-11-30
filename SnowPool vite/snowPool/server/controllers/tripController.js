@@ -23,16 +23,6 @@ const createTrip = async (req, res) => {
 
     const savedTrip = await trip.save();
 
-    const userUpdate = await User.findByIdAndUpdate(
-      req.user.id,
-      { $push: { createdTrips: savedTrip._id } },
-      { new: true }
-    );
-
-    if (!userUpdate) {
-      return res.status(404).json({ message: "User not found." });
-    }
-
     res.status(201).json(savedTrip);
   } catch (error) {
     res
@@ -60,36 +50,6 @@ const getAllTrips = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-
-// Search
-// const searchTrips = async (req, res) => {
-//   try {
-//     const { origin, destination, date, tripType } = req.query;
-//     console.log("req.query", req.query);
-//     const query = {
-//       origin: new RegExp(origin, "i"),
-//       destination: new RegExp(destination, "i"),
-//       date: date ? new Date(date) : { $exists: true },
-//     };
-//     console.log("query", query);
-
-//     if (tripType) {
-//       query.tripType = tripType;
-//     }
-
-//     const trips = await Trip.find(query)
-//       .populate({
-//         path: "user",
-//         select:
-//           "name email gender birthday carModel driverHistory licensePlate createdAt",
-//       })
-//       .sort({ createdAt: -1 });
-//     console.log(trips);
-//     res.status(200).json(trips);
-//   } catch (error) {
-//     res.status(500).json({ message: "Error searching trips" });
-//   }
-// };
 
 const searchTrips = async (req, res) => {
   try {
@@ -121,11 +81,9 @@ const searchTrips = async (req, res) => {
 
 const getMyTrips = async (req, res) => {
   try {
-    const trips = await Trip.find({ user: req.user.id })
-      .populate("bookings")
-      .sort("-createdAt");
+    const trips = await Trip.find({ user: req.user.id }).sort("-createdAt");
 
-    console.log("my-trips response:", trips);
+    // console.log("my-trips response:", trips);
     res.status(200).json(trips);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -176,6 +134,7 @@ const updateTrip = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
 const deleteTrip = async (req, res) => {
   try {
     const trip = await Trip.findOne({

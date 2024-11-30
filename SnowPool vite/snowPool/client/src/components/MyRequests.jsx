@@ -1,5 +1,4 @@
 import React from "react";
-// import styles from "../pages/MyTrips.module.css";
 import styles from "./MyRequests.module.css";
 import { formatDate } from "./utils";
 import { useNavigate } from "react-router-dom";
@@ -8,15 +7,11 @@ import { useUserContext } from "../contexts/UserContext";
 const MyRequests = ({ bookings, handleBookingAction }) => {
   const navigate = useNavigate();
   const { userData } = useUserContext();
-  console.log(bookings);
+  console.log("bookings", bookings);
 
   const renderBookingCard = (booking) => {
-    const isRequestor = booking.user === userData?._id;
-    const isRequestReceiver = booking.trip?.user === userData?._id;
-    console.log("current user", userData._id);
-    console.log("booking", booking);
-    console.log("requestor", isRequestor);
-    console.log("request reciever", isRequestReceiver);
+    const isRequestor = booking.user.userId === userData?._id;
+    const isRequestReceiver = booking.trip?.tripInitiator === userData?._id;
 
     return (
       <div key={booking._id} className={styles.bookingCard}>
@@ -30,9 +25,9 @@ const MyRequests = ({ bookings, handleBookingAction }) => {
           <p>
             Trip Details:
             <br />
-            Date: {formatDate(booking?.trip?.date)}
+            Date: {formatDate(booking?.trip?.tripDate)}
             <br />
-            Time: {booking?.trip?.time}
+            Time: {booking?.trip?.tripTime}
             <br />
             Price: ${booking?.totalAmount}
             <br />
@@ -42,12 +37,12 @@ const MyRequests = ({ bookings, handleBookingAction }) => {
             Seats: {booking?.requestedSeats}
           </p>
           <p>
-            Driver:{" "}
-            {booking?.driverName == userData.name
-              ? "Yourself"
-              : booking?.driverName || "Unknown"}
+            Driver: {booking.driver.name}
             <br />
-            Passenger: {booking?.passenger?.name || "Unknown"}
+            Passenger:{" "}
+            {booking.requestType === "driver"
+              ? booking.trip.userName
+              : booking.user.userName}
           </p>
         </div>
         {booking?.status === "pending" && (
@@ -55,13 +50,25 @@ const MyRequests = ({ bookings, handleBookingAction }) => {
             {isRequestReceiver ? (
               <>
                 <button
-                  onClick={() => handleBookingAction(booking._id, "accept")}
+                  onClick={() =>
+                    handleBookingAction(
+                      booking._id,
+                      booking.trip.tripId,
+                      "accept"
+                    )
+                  }
                   className={styles.acceptButton}
                 >
                   Accept
                 </button>
                 <button
-                  onClick={() => handleBookingAction(booking._id, "decline")}
+                  onClick={() =>
+                    handleBookingAction(
+                      booking._id,
+                      booking.trip.tripId,
+                      "decline"
+                    )
+                  }
                   className={styles.declineButton}
                 >
                   Decline

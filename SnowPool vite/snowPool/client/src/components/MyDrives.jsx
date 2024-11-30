@@ -24,7 +24,8 @@ const MyDrives = ({ trips, handleDelete }) => {
           <div key={trip._id} className={styles.tripCard}>
             <div className={styles.tripHeader}>
               <h3>
-                {getFirstPart(trip.origin)} to {getFirstPart(trip.destination)}
+                {getFirstPart(trip.origin, ",")} to{" "}
+                {getFirstPart(trip.destination, ",")}
               </h3>
             </div>
             <div className={styles.tripDetails}>

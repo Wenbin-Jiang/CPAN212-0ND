@@ -11,104 +11,86 @@ const createBookingRequest = async (req, res) => {
 
     // Check for existing booking
     const existingRequest = await Booking.findOne({
-      trip: tripId,
-      $or: [{ passenger: userId }, { driver: userId }],
+      "trip.tripId": tripId,
+      "user.userId": userId,
     });
 
     if (existingRequest) {
-      console.log("You already have a booking request for this trip.");
       return res.status(400).json({
         message: "You already have a booking request for this trip.",
       });
     }
 
     const trip = await Trip.findById(tripId).populate("user");
+    const user = await User.findById(userId);
 
     if (!trip) {
-      console.error("Trip not found with ID:", tripId);
       return res.status(404).send("Trip not found");
     }
 
-    console.log("Trip found:", trip);
-
     if (trip.user._id.toString() === userId) {
-      console.error("User is trying to book their own trip:", userId);
       return res.status(400).send("Cannot book your own trip.");
     }
 
     // Prepare booking data
     const bookingData = {
-      user: userId,
-      trip: tripId,
+      user: { userId, userName },
+      trip: {
+        tripId,
+        tripInitiator: trip.user,
+        tripDate: trip.date,
+        tripTime: trip.time,
+        userName: trip.user.name,
+      },
       requestType,
       status: "pending",
-      pickupLocation: trip.origin,
-      dropoffLocation: trip.destination,
-      driver: requestType == "driver" ? userId : trip.user._id,
-      driverName: requestType == "driver" ? userName : trip.user.name,
-      passenger: requestType == "passenger" ? userId : trip.user._id,
-      passengerName: requestType == "passenger" ? userName : trip.user.name,
       pickupLocation: {
         address: trip.origin,
         coordinates: trip.originLatLng,
       },
       dropoffLocation: {
         address: trip.destination,
-        coordinates: trip.originLatLng,
+        coordinates: trip.destinationLatLng,
       },
     };
+    // Set driver data
+    bookingData.driver = {
+      user: requestType === "driver" ? userId : trip.user._id,
+      name: requestType === "driver" ? userName : trip.user.name,
+    };
+
+    // Initialize empty passengers array
+    bookingData.passengers = [];
 
     if (requestType === "driver") {
       if (!willingToPay || isNaN(willingToPay) || willingToPay <= 0) {
-        console.error("Invalid 'willingToPay' value:", willingToPay);
         return res.status(400).json({
           message: "Invalid value for 'willingToPay'.",
         });
       }
-
-      bookingData.driver = userId;
       bookingData.totalAmount = Number(willingToPay);
     } else if (requestType === "passenger") {
       if (!requestedSeats || isNaN(requestedSeats) || requestedSeats <= 0) {
-        console.error("Invalid 'requestedSeats' value:", requestedSeats);
         return res.status(400).json({
           message: "Invalid number of requested seats.",
         });
       }
 
       if (trip.seatsAvailable < requestedSeats) {
-        console.error(
-          "Not enough seats available. Requested:",
-          requestedSeats,
-          "Available:",
-          trip.seatsAvailable
-        );
         return res.status(400).send("Not enough seats available.");
       }
 
-      bookingData.passenger = userId;
       bookingData.requestedSeats = Number(requestedSeats);
       bookingData.totalAmount =
         Number(trip.pricePerSeat) * Number(requestedSeats);
-    } else {
-      return res.status(400).json({
-        message: "Invalid request type. Must be 'driver' or 'passenger'.",
-      });
     }
 
     const booking = new Booking(bookingData);
     await booking.save();
-    trip.bookings.push(booking._id);
 
-    if (requestType === "passenger") {
-      trip.seatsAvailable -= Number(requestedSeats);
-    }
-
-    await trip.save();
-
-    // Notify trip owner or recipient
+    // Notify recipient
     const recipientId =
-      requestType === "driver" ? trip.user._id : bookingData.driver;
+      requestType === "driver" ? trip.user._id : bookingData.driver.user;
     const recipient = await User.findById(recipientId);
 
     if (recipient) {
@@ -117,7 +99,6 @@ const createBookingRequest = async (req, res) => {
         booking: booking._id,
         message: `New ${requestType} booking request received for your trip from ${trip.origin} to ${trip.destination} on ${trip.date}`,
       });
-
       await recipient.save();
     }
 
@@ -130,78 +111,131 @@ const createBookingRequest = async (req, res) => {
 const handleBookingRequest = async (req, res) => {
   try {
     const { bookingId } = req.params;
-    const { action } = req.body;
-    console.log("bookingid", bookingId);
-    console.log("action", action);
-    console.log(req.body);
-    // Validate action
-    if (!["accept", "decline"].includes(action)) {
-      return res.status(400).json({ message: "Invalid action" });
+    const { tripId, action } = req.body;
+
+    const trip = await Trip.findById(tripId).populate("user");
+    console.log("handling trip", trip);
+    if (!trip) {
+      return res.status(404).json({
+        success: false,
+        message: "Trip not found",
+      });
     }
 
-    // Find the booking and populate the related trip
-    const booking = await Booking.findById(bookingId).populate("trip");
+    // Validate action
+    if (!["accept", "decline"].includes(action)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid action",
+      });
+    }
+
+    // Find the booking and populate the related trip and user
+    const booking = await Booking.findById(bookingId)
+      .populate("trip")
+      .populate("user.userId", "name");
 
     if (!booking) {
-      return res.status(404).json({ message: "Booking not found" });
+      return res.status(404).json({
+        success: false,
+        message: "Booking not found",
+      });
+    }
+
+    // Initialize passengers array if it doesn't exist
+    if (!booking.passengers) {
+      booking.passengers = [];
     }
 
     // Update booking and trip status
     if (action === "accept") {
       booking.status = "accepted";
 
-      // Ensure the trip is valid and has enough available seats
+      if (booking.requestType === "driver") {
+        booking.passengers.push({
+          userId: trip.user._id,
+          name: trip.user.name,
+        });
+      }
+
       if (
         booking.requestType === "passenger" &&
-        booking.trip &&
-        booking.trip.seatsAvailable >= booking.requestedSeats
+        trip.seatsAvailable &&
+        trip.seatsAvailable >= booking.requestedSeats
       ) {
-        booking.trip.seatsAvailable -= booking.requestedSeats;
-      } else if (
-        booking.trip &&
-        booking.trip.seatsAvailable < booking.requestedSeats
-      ) {
-        return res.status(400).json({ message: "Not enough available seats" });
+        const passengerExists = booking.passengers.some(
+          (passenger) =>
+            passenger.userId.toString() === booking.user.userId.toString()
+        );
+
+        if (!passengerExists) {
+          booking.passengers.push({
+            userId: booking.user.userId,
+            name: booking.user.userName,
+          });
+        }
+
+        trip.seatsAvailable -= booking.requestedSeats;
+      } else if (trip && trip.seatsAvailable < booking.requestedSeats) {
+        return res.status(400).json({
+          success: false,
+          message: "Not enough available seats",
+        });
       }
     } else if (action === "decline") {
       booking.status = "declined";
     }
 
     // Save the booking and related trip
-    await booking.save();
-    if (booking.trip) {
-      await booking.trip.save();
-    }
+    await Promise.all([booking.save(), trip.save()]);
 
-    // Notify the passenger
-    const passenger = await User.findById(booking.passenger);
-
-    if (passenger) {
-      passenger.notifications.push({
-        type: `booking${action}ed`,
+    // Notify the recipient
+    const recipient = await User.findById(booking.user?.userId);
+    if (recipient) {
+      recipient.notifications.push({
+        type: `booking${action === "accept" ? "Accept" : "Declin"}ed`,
         booking: booking._id,
-        message: `Your booking request from ${trip.origin} to ${trip.destination} on ${trip.date} has been ${action}ed.`,
+        message: `Your booking request from ${trip.origin} to ${
+          trip.destination
+        } on ${trip.date} has been ${
+          action === "accept" ? "accepted" : "declined"
+        }.`,
       });
-      await passenger.save();
+      await recipient.save();
     }
 
-    res.status(200).json(booking);
+    res.status(200).json({
+      success: true,
+      message: `Booking ${action}ed successfully`,
+      data: {
+        booking,
+        trip,
+        status: booking.status,
+        seatsAvailable: trip.seatsAvailable,
+        passengers: booking.passengers,
+      },
+    });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("Booking action error:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message || "Failed to process booking request",
+    });
   }
 };
 
 const getBookingsByUser = async (req, res) => {
   try {
     const bookings = await Booking.find({
-      $or: [{ passenger: req.user.id }, { driver: req.user.id }],
+      $or: [
+        { "user.userId": req.user.id },
+        { "trip.tripInitiator": req.user.id },
+      ],
     })
       .populate("trip")
-      .populate("passenger")
       .populate("driver")
       .sort("-createdAt");
-
-    console.log("Bookings response:", bookings);
+    // console.log("return bookings", bookings);
     res.status(200).json(bookings);
   } catch (error) {
     res.status(500).json({ message: error.message });

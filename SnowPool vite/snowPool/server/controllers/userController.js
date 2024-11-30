@@ -176,8 +176,6 @@ const getUserProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user.id)
       .select("-password")
-      .populate("createdTrips")
-      .populate("bookings")
       .populate("notifications.booking")
       .populate("notifications.trip");
 

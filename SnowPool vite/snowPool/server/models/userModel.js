@@ -80,18 +80,6 @@ const userSchema = new mongoose.Schema(
         },
       },
     ],
-    createdTrips: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Trip",
-      },
-    ],
-    bookings: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Booking",
-      },
-    ],
     ratings: {
       asDriver: {
         average: { type: Number, default: 0 },

@@ -73,12 +73,6 @@ const tripSchema = new mongoose.Schema(
       enum: ["active", "filled", "inProgress", "completed", "cancelled"],
       default: "active",
     },
-    bookings: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Booking",
-      },
-    ],
   },
   {
     timestamps: true,
