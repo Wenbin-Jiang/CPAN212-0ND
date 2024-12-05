@@ -95,12 +95,17 @@ const ProfilePage = () => {
           <div className={styles.leftColumn}>
             <div className={styles.avatarContainer}>
               <img
-                src={userData?.profilePicture || "/profile-icon.jpeg"}
+                src={
+                  userData.profilePicture
+                    ? `${import.meta.env.VITE_SERVER_BASE_URL}${
+                        userData.profilePicture
+                      }`
+                    : "../profile-icon.jpeg"
+                }
                 alt="Profile"
                 className={styles.avatar}
                 onError={(e) => {
-                  e.target.onerror = null;
-                  e.target.src = "/profile-icon.jpeg";
+                  e.target.src = "../profile-icon.jpeg";
                 }}
               />
               <label className={styles.cameraButton}>

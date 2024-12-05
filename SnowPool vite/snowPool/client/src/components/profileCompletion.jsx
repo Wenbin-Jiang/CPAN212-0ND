@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUserContext } from "../contexts/UserContext";
 import api from "../services/api";
@@ -36,48 +36,71 @@ const ProfileCompletion = () => {
 
   const handleInputChange = (e) => {
     const { name, value, files } = e.target;
-    setError(""); // Clear error on input change
+    setError("");
 
     if (name === "profilePicture" && files[0]) {
-      // Validate image size (5MB limit)
-      if (files[0].size > 5000000) {
+      const file = files[0];
+
+      // Validate file size (5MB)
+      if (file.size > 5 * 1024 * 1024) {
         setError("Image size should be less than 5MB");
+        e.target.value = ""; // Clear the file input
         return;
       }
-      setFormData((prev) => ({ ...prev, profilePicture: files[0] }));
+
+      // Validate file type
+      const allowedTypes = ["image/jpeg", "image/png", "image/jpg"];
+      if (!allowedTypes.includes(file.type)) {
+        setError("Only .png, .jpg and .jpeg formats are allowed");
+        e.target.value = ""; // Clear the file input
+        return;
+      }
+
+      // Create preview URL
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFormData((prev) => ({
+          ...prev,
+          profilePicture: file,
+        }));
+      };
+      reader.readAsDataURL(file);
     } else {
-      setFormData((prev) => ({ ...prev, [name]: value }));
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
     }
   };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError("");
 
     try {
-      const profileData = {
-        ...formData,
-        profileComplete: true,
-      };
-      delete profileData.profilePicture;
+      const formDataToSend = new FormData();
 
-      // Update profile data
-      const response = await api.put("/api/users/profile", profileData);
+      // Append all profile data
+      Object.keys(formData).forEach((key) => {
+        if (key === "profilePicture" && formData[key]) {
+          formDataToSend.append("profilePicture", formData[key]); // Changed from 'image' to 'profilePicture'
+        } else {
+          formDataToSend.append(key, formData[key]);
+        }
+      });
 
-      // Handle profile picture upload if exists
-      if (formData.profilePicture) {
-        const pictureFormData = new FormData();
-        pictureFormData.append("profilePicture", formData.profilePicture);
-        await api.put("/api/users/profile/update", pictureFormData, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
-      }
+      formDataToSend.append("profileComplete", true);
 
-      // Get updated profile
-      const updatedProfile = await api.get("/api/users/profile");
+      // Single request to update profile with image
+      const response = await api.put("/api/users/profile", formDataToSend, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${localStorage.getItem("token")}`, // Add token if needed
+        },
+      });
+
       setUser({
-        ...updatedProfile.data.data,
+        ...response.data.data,
         profileComplete: true,
       });
 
@@ -89,6 +112,18 @@ const ProfileCompletion = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    // Cleanup function to revoke object URLs
+    return () => {
+      if (
+        formData.profilePicture &&
+        typeof formData.profilePicture === "object"
+      ) {
+        URL.revokeObjectURL(URL.createObjectURL(formData.profilePicture));
+      }
+    };
+  }, [formData.profilePicture]);
 
   return (
     <div className={styles.completionForm}>

@@ -110,6 +110,67 @@ const loginUser = async (req, res) => {
 };
 
 // Update User Profile
+// const updateUserProfile = async (req, res) => {
+//   try {
+//     const {
+//       name,
+//       address,
+//       gender,
+//       birthday,
+//       phone,
+//       driverHistory,
+//       carModel,
+//       licensePlate,
+//       bio,
+//     } = req.body;
+
+//     const user = await User.findById(req.user.id);
+//     if (!user) {
+//       return res.status(404).json({
+//         success: false,
+//         message: "User not found.",
+//       });
+//     }
+
+//     Object.assign(user, {
+//       name,
+//       address,
+//       gender,
+//       birthday,
+//       phone,
+//       driverHistory,
+//       carModel,
+//       licensePlate,
+//       bio,
+//     });
+
+//     user.profileComplete = checkProfileCompletion(user);
+//     await user.save();
+
+//     res.status(200).json({
+//       success: true,
+//       message: "Profile updated successfully.",
+//       data: {
+//         id: user._id,
+//         name: user.name,
+//         email: user.email,
+//         address: user.address,
+//         gender: user.gender,
+//         birthday: user.birthday,
+//         phone: user.phone,
+//         driverHistory: user.driverHistory,
+//         carModel: user.carModel,
+//         licensePlate: user.licensePlate,
+//         bio: user.bio,
+//         profileComplete: user.profileComplete,
+//         ratings: user.ratings,
+//       },
+//     });
+//   } catch (err) {
+//     res.status(500).json({ success: false, message: err.message });
+//   }
+// };
+
 const updateUserProfile = async (req, res) => {
   try {
     const {
@@ -144,6 +205,13 @@ const updateUserProfile = async (req, res) => {
       bio,
     });
 
+    // Handle profile picture upload
+    if (req.file) {
+      // Assuming you're using multer for file upload
+      const profilePicturePath = `/uploads/${req.file.filename}`;
+      user.profilePicture = profilePicturePath;
+    }
+
     user.profileComplete = checkProfileCompletion(user);
     await user.save();
 
@@ -164,6 +232,7 @@ const updateUserProfile = async (req, res) => {
         bio: user.bio,
         profileComplete: user.profileComplete,
         ratings: user.ratings,
+        profilePicture: user.profilePicture,
       },
     });
   } catch (err) {

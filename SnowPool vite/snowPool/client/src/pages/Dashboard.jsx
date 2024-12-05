@@ -11,6 +11,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const { userData, loading } = useUserContext();
 
+  console.log("userdata", userData);
   useEffect(() => {
     if (!loading && !userData) {
       navigate("/login");
@@ -31,9 +32,18 @@ const Dashboard = () => {
     <div className={styles.profileSection}>
       <div className={styles.profileInfo}>
         <img
-          src={userData.profilePicture || "../profile-icon.jpeg"}
+          src={
+            userData.profilePicture
+              ? `${import.meta.env.VITE_SERVER_BASE_URL}${
+                  userData.profilePicture
+                }`
+              : "../profile-icon.jpeg"
+          }
           alt="Profile"
           className={styles.profileImage}
+          onError={(e) => {
+            e.target.src = "../profile-icon.jpeg";
+          }}
         />
         <div className={styles.welcomeText}>
           <h1>Hi {userData.name},</h1>
