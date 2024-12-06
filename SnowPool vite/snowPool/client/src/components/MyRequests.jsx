@@ -89,7 +89,7 @@ const MyRequests = ({ bookings, handleBookingAction }) => {
     <div className={styles.bookingsList}>
       {!bookings || bookings.length === 0 ? (
         <div className={styles.empty}>
-          <p>No booking requests found.</p>
+          <p className="noRequest">No booking requests found.</p>
           <button
             onClick={() => navigate("/findride")}
             className={styles.findRideButton}

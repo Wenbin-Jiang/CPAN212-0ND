@@ -92,9 +92,18 @@ function SearchResultItem({ trip }) {
   const renderDriverInfo = () => (
     <div className={styles.driverSection}>
       <img
-        src={trip.user?.photo || "/profile-icon.jpeg"}
-        alt=""
+        src={
+          trip.user?.profilePicture
+            ? `${import.meta.env.VITE_SERVER_BASE_URL}${
+                trip.user?.profilePicture
+              }`
+            : "../profile-icon.jpeg"
+        }
+        alt="Profile"
         className={styles.driverPhoto}
+        onError={(e) => {
+          e.target.src = "../profile-icon.jpeg";
+        }}
       />
       <div className={styles.driverInfo}>
         <h4>{trip.user?.name}</h4>

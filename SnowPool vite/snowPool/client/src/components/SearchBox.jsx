@@ -31,7 +31,7 @@ function SearchBox({ onSearch, isLoading }) {
       return false;
     }
 
-    const selectedDate = new Date(date);
+    const selectedDate = new Date(date + "T00:00:00");
     const today = new Date();
 
     selectedDate.setHours(0, 0, 0, 0);

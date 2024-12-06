@@ -19,6 +19,7 @@ const MyTrips = () => {
   const fetchTrips = async () => {
     try {
       const response = await api.get("/api/trips/user/my-trips");
+      console.log("response after deleting", response);
       if (Array.isArray(response)) {
         setAllTrips(response);
       }
@@ -64,10 +65,14 @@ const MyTrips = () => {
 
     try {
       const response = await api.delete(`/api/trips/${tripId}`);
-
-      if (response && response?.message === "Trip deleted successfully") {
+      console.log("response front end after deletion", response);
+      console.log(
+        "response message front end after deletion",
+        response.message
+      );
+      if (response && response?.message) {
         await fetchTrips();
-        alert("Trip successfully deleted");
+        alert(response.message);
       } else {
         alert("Failed to delete trip");
       }
@@ -84,9 +89,8 @@ const MyTrips = () => {
         tripId,
         action,
       });
-      console.log(response);
       if (response?.success) {
-        await fetchBookings();
+        await Promise.all([fetchBookings(), fetchTrips()]);
         alert(`Request successfully ${response.data.status}`);
       } else {
         alert("An error occurred while handling request.");
@@ -98,7 +102,26 @@ const MyTrips = () => {
       );
     }
   };
-  const filteredTrips = allTrips.filter((trip) => trip.tripType === activeTab);
+
+  const getFilteredTrips = () => {
+    if (activeTab === "driver") {
+      return allTrips.filter(
+        (trip) =>
+          trip.tripType === "driver" ||
+          (trip.role === "driver" && trip.status === "accepted")
+      );
+    }
+
+    if (activeTab === "passenger") {
+      return allTrips.filter(
+        (trip) =>
+          trip.tripType === "passenger" ||
+          (trip.role === "passenger" && trip.status === "accepted")
+      );
+    }
+
+    return [];
+  };
 
   return (
     <main className={styles.trips}>
@@ -135,10 +158,10 @@ const MyTrips = () => {
         {error && <div className={styles.error}>{error}</div>}
 
         {activeTab === "driver" && (
-          <MyDrives trips={filteredTrips} handleDelete={handleDelete} />
+          <MyDrives trips={getFilteredTrips()} handleDelete={handleDelete} />
         )}
         {activeTab === "passenger" && (
-          <MyRides trips={filteredTrips} handleDelete={handleDelete} />
+          <MyRides trips={getFilteredTrips()} handleDelete={handleDelete} />
         )}
         {activeTab === "bookingManagement" && (
           <MyRequests

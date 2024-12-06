@@ -1,8 +1,8 @@
-/* Main Container */
+/* Base Layout */
 .trips {
+  min-height: calc(100vh - 5rem);
   margin: 2.5rem;
   padding: 2.5rem 5rem;
-  min-height: calc(100vh - 5rem);
   background-image: linear-gradient(
       rgba(166, 168, 172, 0.293),
       rgba(106, 108, 110, 0.798)
@@ -12,7 +12,7 @@
   background-position: center;
 }
 
-/* Navigation Tabs */
+/* Navigation */
 .tabs {
   width: 50%;
   display: flex;
@@ -35,23 +35,24 @@
   border-bottom: 2px solid #0084ff;
 }
 
-/* Trip Card */
+/* Trip Cards */
 .tripCard {
   width: 50%;
-  background: rgba(255, 255, 255, 0.422);
-  border-radius: 12px;
   padding: 20px;
   margin-bottom: 16px;
+  background: rgba(255, 255, 255, 0.422);
+  border-radius: 12px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .tripHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   margin-bottom: 16px;
   color: #131314;
   font-size: 1.5rem;
+}
+
+.tripHeader h3 {
+  margin: 0;
 }
 
 .tripDetails {
@@ -59,12 +60,61 @@
   color: #131314;
 }
 
+.tripDetails p {
+  margin-bottom: 12px;
+}
+
+.tripStatus {
+  margin: 12px 0;
+  font-size: 1.4rem;
+}
+
+.driverInfo {
+  margin: 12px 0;
+  font-size: 1.4rem;
+  color: #131314;
+}
+
+/* Status Badges */
+.statusBadge {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.9em;
+  margin-left: 8px;
+  display: inline-block;
+}
+
+.filledBadge {
+  background-color: #ff4444;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 1.2rem;
+  margin-left: 8px;
+  font-weight: 500;
+}
+
+.pending {
+  background-color: #ffc107;
+  color: black;
+}
+
+.accepted {
+  background-color: #4caf50;
+  color: white;
+}
+
+.declined {
+  background-color: #f44336;
+  color: white;
+}
+
 /* Price Section */
 .priceSection {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  margin: 12px 0;
+  margin-top: 12px;
 }
 
 .price {
@@ -74,57 +124,37 @@
   margin-bottom: 8px;
 }
 
-.seatsLeft,
 .seatsRequired {
   padding: 4px 8px;
   border-radius: 4px;
-  font-size: 1.5rem;
-}
-
-.seatsLeft {
-  background-color: rgba(0, 132, 255, 0.1);
-  color: #0084ff;
-}
-
-.seatsRequired {
+  font-size: 1.4rem;
   background-color: rgba(220, 53, 69, 0.1);
   color: #dc3545;
 }
 
 /* Buttons */
 .editButton,
-.deleteButton {
+.deleteButton,
+.postButton,
+.findRideButton {
   padding: 8px 16px;
-  border-radius: 6px;
   border: none;
+  border-radius: 6px;
   cursor: pointer;
-  margin-top: 2rem;
 }
 
-.editButton {
+.editButton,
+.postButton,
+.findRideButton {
   background: #0084ff;
   color: white;
+  width: auto;
 }
 
 .deleteButton {
   background: #dc3545;
   color: white;
-}
-
-.deleteButton:hover {
-  background-color: #d32f2f;
-}
-
-.postButton,
-.findRideButton {
-  padding: 10px 20px;
-  background: #0084ff;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  margin-top: 12px;
-  width: fit-content;
+  margin-top: 2rem;
 }
 
 .postButton:hover,
@@ -132,7 +162,11 @@
   background: #0066cc;
 }
 
-/* Messages and States */
+.deleteButton:hover {
+  background-color: #d32f2f;
+}
+
+/* Messages */
 .empty {
   text-align: center;
   padding: 40px;
@@ -148,62 +182,15 @@
   margin-bottom: 16px;
 }
 
-.additionalMessage {
-  margin-top: 8px;
-  font-style: italic;
-  color: #0f0f0f;
-  font-size: 1.5rem;
-}
-.requestsSection {
-  margin-top: 1rem;
-  border-top: 1px solid #eee;
-  padding-top: 1rem;
-}
-
-.request {
-  background: rgba(255, 255, 255, 0.5);
-  padding: 1rem;
-  margin-bottom: 0.5rem;
-  border-radius: 4px;
-}
-
-.requestActions {
-  display: flex;
-  gap: 1rem;
-  margin-top: 0.5rem;
-}
-
-.acceptButton {
-  background: #00c46a;
-  color: white;
-  padding: 0.5rem 1rem;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.declineButton {
-  background: #dc3545;
-  color: white;
-  padding: 0.5rem 1rem;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.requestStatus {
-  margin-top: 0.5rem;
-  font-weight: bold;
-}
-
+/* Loading State */
 .loader {
   width: 48px;
   height: 48px;
+  margin: 20px auto;
   border: 5px solid #f3f3f3;
   border-top: 5px solid #3498db;
   border-radius: 50%;
   animation: spin 1s linear infinite;
-  margin: 20px auto;
 }
 
 @keyframes spin {
@@ -215,24 +202,54 @@
   }
 }
 
-.pendingStatus {
-  color: #f5a623;
-  font-style: italic;
-  text-align: center;
-  padding: 10px;
+/* Media Queries */
+@media (max-width: 1200px) {
+  .trips {
+    margin: 1.5rem;
+    padding: 2rem;
+  }
+
+  .tripCard,
+  .tabs {
+    width: 70%;
+  }
 }
 
-.pending {
-  color: #f5a623;
-  font-weight: bold;
+@media (max-width: 768px) {
+  .trips {
+    margin: 1rem;
+    padding: 1.5rem;
+  }
+
+  .tabs {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .tripCard {
+    width: 100%;
+  }
+
+  .tripHeader,
+  .tripDetails,
+  .price,
+  .seatsLeft,
+  .seatsRequired {
+    font-size: 1.2rem;
+  }
 }
 
-.accepted {
-  color: #28a745;
-  font-weight: bold;
+.passengerSection {
+  margin-top: 12px;
+  font-size: 1.4rem;
+  color: #131314;
 }
 
-.declined {
-  color: #dc3545;
-  font-weight: bold;
+.passengerTitle {
+  margin-bottom: 4px;
+  font-weight: 500;
+}
+
+.passengerName {
+  color: #666;
 }

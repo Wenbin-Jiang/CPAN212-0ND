@@ -13,6 +13,7 @@
 .driverSection {
   width: 100px;
   text-align: center;
+  color: black;
 }
 
 .driverPhoto {
@@ -110,7 +111,8 @@
 
 .tripFull {
   color: #dc3545;
-  font-size: 14px;
+  font-size: 2rem;
+  font-weight: 800;
 }
 
 /* Footer Section */
@@ -149,8 +151,10 @@
 }
 
 .requestButton:disabled {
-  background-color: #ccc;
+  background-color: #0acd72;
   cursor: not-allowed;
+  color: rgb(203, 44, 44);
+  font-weight: 800;
 }
 
 .requestButton:hover:not(:disabled) {

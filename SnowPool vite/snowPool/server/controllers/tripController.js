@@ -1,5 +1,25 @@
 const Trip = require("../models/tripsModal");
 const User = require("../models/userModel");
+const Booking = require("../models/bookingModal");
+
+const getFirstPart = (address) => address?.split(",")[0] || "";
+
+const formatDate = (dateString, time) => {
+  try {
+    const isoString = dateString.toISOString().split("T")[0];
+    const date = new Date(`${isoString}T${time}`);
+
+    return `${date.toLocaleDateString("en-US", {
+      weekday: "long",
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+    })} at ${time}`;
+  } catch (error) {
+    console.error("Date formatting error:", error);
+    return `${dateString} at ${time}`;
+  }
+};
 
 const createTrip = async (req, res) => {
   if (
@@ -69,7 +89,7 @@ const searchTrips = async (req, res) => {
       .populate({
         path: "user",
         select:
-          "name email gender birthday carModel driverHistory licensePlate createdAt",
+          "name email gender profilePicture birthday carModel driverHistory licensePlate createdAt",
       })
       .sort({ createdAt: -1 });
 
@@ -81,10 +101,95 @@ const searchTrips = async (req, res) => {
 
 const getMyTrips = async (req, res) => {
   try {
-    const trips = await Trip.find({ user: req.user.id }).sort("-createdAt");
+    // Get user's own created trips
+    const ownTrips = await Trip.find({ user: req.user.id })
+      .populate("user", "name email")
+      .sort("-createdAt");
 
-    // console.log("my-trips response:", trips);
-    res.status(200).json(trips);
+    // Get accepted bookings where user is either driver or passenger
+    const acceptedBookings = await Booking.find({
+      $or: [
+        { "driver.user": req.user.id, status: "accepted" },
+        { "passengers.userId": req.user.id, status: "accepted" },
+      ],
+    })
+      .populate({
+        path: "trip.tripId",
+        populate: {
+          path: "user",
+          select: "name email",
+        },
+      })
+      .sort("-createdAt");
+
+    // Transform booking data to match trip format
+    const bookingTrips = acceptedBookings.map((booking) => ({
+      _id: booking.trip.tripId._id,
+      origin: booking.trip.tripId.origin,
+      destination: booking.trip.tripId.destination,
+      date: booking.trip.tripDate,
+      time: booking.trip.tripTime,
+      driver: {
+        userId: booking.driver.user,
+        name: booking.driver.name,
+      },
+      passengers: booking.passengers,
+      requestedSeats: booking.trip.tripId.seatsRequired,
+      totalAmount: booking.totalAmount,
+      status: booking.status,
+      role:
+        booking.driver.user.toString() === req.user.id ? "driver" : "passenger",
+    }));
+
+    // Add driver/passenger info to own trips
+    const formattedOwnTrips = ownTrips
+      .map((trip) => {
+        // Find if this trip has an accepted booking
+        const relatedBooking = acceptedBookings.find(
+          (booking) =>
+            booking.trip.tripId._id.toString() === trip._id.toString()
+        );
+
+        // If this trip has an accepted booking and user is passenger, skip it
+        if (relatedBooking && trip.tripType === "passenger") {
+          return null;
+        }
+
+        return {
+          ...trip._doc,
+          driver:
+            trip.tripType === "passenger"
+              ? relatedBooking
+                ? {
+                    userId: relatedBooking.driver.user,
+                    name: relatedBooking.driver.name,
+                  }
+                : null
+              : {
+                  userId: trip.user._id,
+                  name: trip.user.name,
+                },
+          passengers:
+            trip.tripType === "passenger"
+              ? [
+                  {
+                    userId: trip.user._id,
+                    name: trip.user.name,
+                  },
+                ]
+              : [],
+          role: "owner",
+          status: relatedBooking ? relatedBooking.status : "pending",
+        };
+      })
+      .filter(Boolean); // Remove null entries
+
+    // Combine and sort all trips
+    const allTrips = [...formattedOwnTrips, ...bookingTrips].sort(
+      (a, b) => new Date(b.date || b.tripDate) - new Date(a.date || a.tripDate)
+    );
+    console.log("all trips", allTrips);
+    res.status(200).json(allTrips);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -135,32 +240,174 @@ const updateTrip = async (req, res) => {
   }
 };
 
+// const deleteTrip = async (req, res) => {
+//   try {
+//     const trip = await Trip.findOne({
+//       _id: req.params.id,
+//       user: req.user.id,
+//     });
+//     console.log("trip to be deleted", trip);
+
+//     if (!trip) {
+//       return res
+//         .status(404)
+//         .json({ message: "Trip not found or unauthorized" });
+//     }
+
+//     await Trip.findByIdAndDelete(req.params.id);
+
+//     res.status(200).json({ message: "Trip deleted successfully" });
+//   } catch (error) {
+//     res.status(500).json({ message: error.message });
+//   }
+// };
+
+// const deleteTrip = async (req, res) => {
+//   try {
+//     const session = await Trip.startSession();
+//     session.startTransaction();
+
+//     try {
+//       const trip = await Trip.findOne({
+//         _id: req.params.id,
+//         user: req.user.id,
+//       });
+
+//       if (!trip) {
+//         await session.abortTransaction();
+//         return res
+//           .status(404)
+//           .json({ message: "Trip not found or unauthorized" });
+//       }
+
+//       const relatedBookings = await Booking.find({
+//         "trip.tripId": trip._id,
+//         status: { $ne: "cancelled" },
+//       });
+
+//       const notificationPromises = relatedBookings.map(async (booking) => {
+//         await Booking.findByIdAndUpdate(
+//           booking._id,
+//           {
+//             status: "cancelled",
+//             cancellationReason: "Trip deleted by creator",
+//           },
+//           { session }
+//         );
+
+//         const bookingUser = await User.findById(booking.user.userId);
+//         if (bookingUser) {
+//           bookingUser.notifications.push({
+//             type: "tripCancelled",
+//             booking: booking._id,
+//             message: `Trip from ${getFirstPart(trip.origin)} to ${getFirstPart(
+//               trip.destination
+//             )} on ${trip.date} has been cancelled by the trip creator.`,
+//             createdAt: new Date(),
+//           });
+//           await bookingUser.save({ session });
+//         }
+//       });
+
+//       await Promise.all(notificationPromises);
+
+//       await Trip.findByIdAndDelete(req.params.id, { session });
+
+//       await session.commitTransaction();
+
+//       res.status(200).json({
+//         message: "Trip and related bookings cancelled successfully",
+//         cancelledBookings: relatedBookings.length,
+//       });
+//     } catch (error) {
+//       await session.abortTransaction();
+//       throw error;
+//     } finally {
+//       session.endSession();
+//     }
+//   } catch (error) {
+//     console.error("Delete trip error:", error);
+//     res.status(500).json({
+//       message: "Failed to delete trip and update bookings",
+//       error: error.message,
+//     });
+//   }
+// };
+
 const deleteTrip = async (req, res) => {
   try {
-    const trip = await Trip.findOne({
-      _id: req.params.id,
-      user: req.user.id,
-    });
-    console.log("trip found", trip);
+    const session = await Trip.startSession();
+    session.startTransaction();
 
-    if (!trip) {
-      return res
-        .status(404)
-        .json({ message: "Trip not found or unauthorized" });
+    try {
+      const trip = await Trip.findOne({
+        _id: req.params.id,
+        user: req.user.id,
+      });
+
+      if (!trip) {
+        await session.abortTransaction();
+        return res
+          .status(404)
+          .json({ message: "Trip not found or unauthorized" });
+      }
+
+      const relatedBookings = await Booking.find({
+        "trip.tripId": trip._id,
+        status: { $ne: "cancelled" },
+      });
+
+      const notificationPromises = relatedBookings.map(async (booking) => {
+        await Booking.findByIdAndUpdate(
+          booking._id,
+          {
+            status: "cancelled",
+            cancellationReason: "Trip deleted by creator",
+          },
+          { session }
+        );
+
+        const bookingUser = await User.findById(booking.user.userId);
+        if (bookingUser) {
+          bookingUser.notifications.push({
+            type: "tripCancelled",
+            booking: booking._id,
+            message: `Trip from ${getFirstPart(trip.origin)} to ${getFirstPart(
+              trip.destination
+            )} on ${formatDate(
+              trip.date,
+              trip.time
+            )} has been cancelled by the trip creator.`,
+            createdAt: new Date(),
+          });
+          await bookingUser.save({ session });
+        }
+      });
+
+      await Promise.all(notificationPromises);
+
+      await Trip.findByIdAndDelete(req.params.id, { session });
+
+      await session.commitTransaction();
+
+      res.status(200).json({
+        message: "Trip and related bookings cancelled successfully",
+        cancelledBookings: relatedBookings.length,
+      });
+    } catch (error) {
+      await session.abortTransaction();
+      throw error;
+    } finally {
+      session.endSession();
     }
-
-    await Trip.findByIdAndDelete(req.params.id);
-
-    // Remove trip from user's created trips
-    await User.findByIdAndUpdate(req.user.id, {
-      $pull: { createdTrips: req.params.id },
-    });
-    res.status(200).json({ message: "Trip deleted successfully" });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("Delete trip error:", error);
+    res.status(500).json({
+      message: "Failed to delete trip and update bookings",
+      error: error.message,
+    });
   }
 };
-
 module.exports = {
   createTrip,
   getAllTrips,

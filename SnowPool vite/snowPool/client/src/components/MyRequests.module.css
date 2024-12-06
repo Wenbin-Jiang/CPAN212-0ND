@@ -6,6 +6,10 @@
   gap: 20px;
 }
 
+.noRequest {
+  font-size: 5rem;
+}
+
 /* Booking Card */
 .bookingCard {
   width: 50%;
@@ -98,14 +102,14 @@
 }
 
 .findRideButton {
-  padding: 12px 24px;
   background: #0084ff;
   color: white;
   border: none;
   border-radius: 6px;
   cursor: pointer;
-  margin-top: 16px;
+  margin-top: 35px;
   font-size: 1.6rem;
+  width: auto;
   transition: background-color 0.2s;
 }
 

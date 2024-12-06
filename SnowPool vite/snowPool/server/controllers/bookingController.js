@@ -2,6 +2,25 @@ const Booking = require("../models/bookingModal");
 const Trip = require("../models/tripsModal");
 const User = require("../models/userModel");
 
+const getFirstPart = (address) => address?.split(",")[0] || "";
+
+const formatDate = (dateString, time) => {
+  try {
+    const isoString = dateString.toISOString().split("T")[0];
+    const date = new Date(`${isoString}T${time}`);
+
+    return `${date.toLocaleDateString("en-US", {
+      weekday: "long",
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+    })} at ${time}`;
+  } catch (error) {
+    console.error("Date formatting error:", error);
+    return `${dateString} at ${time}`;
+  }
+};
+
 const createBookingRequest = async (req, res) => {
   try {
     const { tripId } = req.params;
@@ -97,7 +116,12 @@ const createBookingRequest = async (req, res) => {
       recipient.notifications.push({
         type: "newBookingRequest",
         booking: booking._id,
-        message: `New ${requestType} booking request received for your trip from ${trip.origin} to ${trip.destination} on ${trip.date}`,
+        message: `New ${requestType} booking request received for your trip from ${getFirstPart(
+          trip.origin
+        )} to ${getFirstPart(trip.destination)} on ${formatDate(
+          trip.date,
+          trip.time
+        )}`,
       });
       await recipient.save();
     }
@@ -113,8 +137,8 @@ const handleBookingRequest = async (req, res) => {
     const { bookingId } = req.params;
     const { tripId, action } = req.body;
 
-    const trip = await Trip.findById(tripId).populate("user");
-    console.log("handling trip", trip);
+    // First find the trip without population
+    const trip = await Trip.findById(tripId);
     if (!trip) {
       return res.status(404).json({
         success: false,
@@ -122,19 +146,8 @@ const handleBookingRequest = async (req, res) => {
       });
     }
 
-    // Validate action
-    if (!["accept", "decline"].includes(action)) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid action",
-      });
-    }
-
-    // Find the booking and populate the related trip and user
-    const booking = await Booking.findById(bookingId)
-      .populate("trip")
-      .populate("user.userId", "name");
-
+    // Find the booking
+    const booking = await Booking.findById(bookingId);
     if (!booking) {
       return res.status(404).json({
         success: false,
@@ -142,52 +155,60 @@ const handleBookingRequest = async (req, res) => {
       });
     }
 
-    // Initialize passengers array if it doesn't exist
-    if (!booking.passengers) {
-      booking.passengers = [];
-    }
-
-    // Update booking and trip status
     if (action === "accept") {
       booking.status = "accepted";
 
-      if (booking.requestType === "driver") {
-        booking.passengers.push({
-          userId: trip.user._id,
-          name: trip.user.name,
-        });
-      }
+      if (booking.requestType === "passenger") {
+        // Check seats availability
+        if (
+          !trip.seatsAvailable ||
+          trip.seatsAvailable < booking.requestedSeats
+        ) {
+          return res.status(400).json({
+            success: false,
+            message: "Not enough available seats",
+          });
+        }
 
-      if (
-        booking.requestType === "passenger" &&
-        trip.seatsAvailable &&
-        trip.seatsAvailable >= booking.requestedSeats
-      ) {
-        const passengerExists = booking.passengers.some(
-          (passenger) =>
-            passenger.userId.toString() === booking.user.userId.toString()
+        // Update seats available
+        const updatedSeats = trip.seatsAvailable - booking.requestedSeats;
+
+        // Use findByIdAndUpdate to ensure atomic update
+        const updatedTrip = await Trip.findByIdAndUpdate(
+          tripId,
+          {
+            $set: { seatsAvailable: updatedSeats },
+            $push: {
+              passengers: {
+                userId: booking.user.userId,
+                name: booking.user.userName,
+              },
+            },
+          },
+          { new: true }
         );
 
-        if (!passengerExists) {
+        if (!updatedTrip) {
+          throw new Error("Failed to update trip");
+        }
+
+        // Update booking passengers
+        if (
+          !booking.passengers.some(
+            (p) => p.userId.toString() === booking.user.userId.toString()
+          )
+        ) {
           booking.passengers.push({
             userId: booking.user.userId,
             name: booking.user.userName,
           });
         }
-
-        trip.seatsAvailable -= booking.requestedSeats;
-      } else if (trip && trip.seatsAvailable < booking.requestedSeats) {
-        return res.status(400).json({
-          success: false,
-          message: "Not enough available seats",
-        });
       }
     } else if (action === "decline") {
       booking.status = "declined";
     }
 
-    // Save the booking and related trip
-    await Promise.all([booking.save(), trip.save()]);
+    await booking.save();
 
     // Notify the recipient
     const recipient = await User.findById(booking.user?.userId);
@@ -195,23 +216,24 @@ const handleBookingRequest = async (req, res) => {
       recipient.notifications.push({
         type: `booking${action === "accept" ? "Accept" : "Declin"}ed`,
         booking: booking._id,
-        message: `Your booking request from ${trip.origin} to ${
-          trip.destination
-        } on ${trip.date} has been ${
+        message: `Your booking request has been ${
           action === "accept" ? "accepted" : "declined"
         }.`,
       });
       await recipient.save();
     }
 
+    // Get the final updated trip for response
+    const finalTrip = await Trip.findById(tripId);
+
     res.status(200).json({
       success: true,
       message: `Booking ${action}ed successfully`,
       data: {
         booking,
-        trip,
+        trip: finalTrip,
         status: booking.status,
-        seatsAvailable: trip.seatsAvailable,
+        seatsAvailable: finalTrip.seatsAvailable,
         passengers: booking.passengers,
       },
     });

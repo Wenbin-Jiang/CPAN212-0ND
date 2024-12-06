@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import api from "../services/api";
 import styles from "./Notifications.module.css";
+import { getFirstPart, formatDate } from "./utils";
 
-const PAGE_SIZE = 3; // Number of notifications per page
+const PAGE_SIZE = 3;
 
 const Notifications = () => {
   const [notifications, setNotifications] = useState([]);

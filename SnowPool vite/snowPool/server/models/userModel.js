@@ -56,6 +56,7 @@ const userSchema = new mongoose.Schema(
             "bookingAccepted",
             "bookingDeclined",
             "tripUpdated",
+            "tripCancelled",
             "paymentReceived",
             "tripStarting",
             "tripCompleted",
